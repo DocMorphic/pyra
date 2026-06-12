@@ -162,6 +162,13 @@ export function MenuBar() {
             }}
           />
           <MenuItem
+            label="Methods & Validation"
+            onClick={() => {
+              openWindow("methods");
+              setOpenMenu(null);
+            }}
+          />
+          <MenuItem
             label="Executive Report"
             onClick={() => {
               openWindow("report");

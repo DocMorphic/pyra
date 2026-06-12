@@ -23,6 +23,7 @@ import { InverterInspectorApp } from "@/components/apps/InverterInspectorApp";
 import { FaultTimelineApp } from "@/components/apps/FaultTimelineApp";
 import { CopilotApp } from "@/components/apps/CopilotApp";
 import { ExecutiveReportApp } from "@/components/apps/ExecutiveReportApp";
+import { MethodsApp } from "@/components/apps/MethodsApp";
 import { SettingsApp } from "@/components/apps/SettingsApp";
 import { AboutApp } from "@/components/apps/AboutApp";
 
@@ -32,6 +33,7 @@ const APP_COMPONENTS: Record<string, React.ComponentType> = {
   inspector: InverterInspectorApp,
   timeline: FaultTimelineApp,
   copilot: CopilotApp,
+  methods: MethodsApp,
   report: ExecutiveReportApp,
   settings: SettingsApp,
   about: AboutApp,

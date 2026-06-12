@@ -1,6 +1,13 @@
 // Shapes of the JSON artifacts emitted by the Python pipeline into
 // app/public/artifacts/ (served at /artifacts/*.json).
 
+export interface PlantLocation {
+  lat: number;
+  lon: number;
+  rmse_deg?: number;
+  source: string;
+}
+
 export interface PlantMeta {
   plant: string;
   inverterCount: number;
@@ -10,7 +17,11 @@ export interface PlantMeta {
   dateEnd: string;
   totalLostEur?: number;
   totalLostKwh?: number;
+  recoverableEur?: number;
+  permanentEur?: number;
   worstInverter?: string;
+  meanModelR2?: number;
+  location?: PlantLocation;
 }
 
 export interface InverterInfo {
@@ -29,28 +40,59 @@ export interface LedgerEntry {
   inverterId: string;
   lostKwh: number;
   lostEur: number;
+  lostEurLo: number;
+  lostEurHi: number;
   health: number;
+  degradationRate: number | null; // %/yr (negative = degrading)
   topCause: Cause;
+  onset: string | null;           // YYYY-MM
+  recoverableEur: number;
+  permanentEur: number;
+  peerDelta: number;
   moduleType: string | null;
   kWp: number | null;
   errorCount: number;
+  modelR2: number | null;
 }
 
 export interface YearPoint {
   year: number;
-  pr: number;
-  norm: number;
+  pr: number | null;
+  prTc: number | null;
+  norm: number | null;
 }
 
 export interface MonthPoint {
   t: string; // YYYY-MM
   actual: number;
   expected: number;
+  lo: number;
+  hi: number;
 }
 
 export interface Performance {
   years: YearPoint[];
   monthly: MonthPoint[];
+  onset: string | null;
+}
+
+export interface ModuleTypeAgg {
+  count: number;
+  medianHealth: number;
+  medianDegradationRate: number | null;
+  lostEur: number;
+  kWp: number;
+}
+
+export interface ModelMetrics {
+  location: PlantLocation;
+  perInverter: Record<string, {
+    r2: number | null; mae: number | null; mbe: number | null;
+    relSigma: number; physicsAgreement: number | null; degradationRate: number | null;
+  }>;
+  meanR2: number | null;
+  medianPhysicsAgreement: number | null;
+  reconciliation: { inverterSumKwh: number; plantMeterKwh: number; ratio: number } | null;
 }
 
 export interface FaultSummary {
@@ -74,21 +116,29 @@ export interface ArtifactBundle {
   causes: Record<string, Cause>;
   faults: Record<string, FaultSummary>;
   tickets: TicketEntry[];
+  metrics: ModelMetrics;
+  moduleTypes: Record<string, ModuleTypeAgg>;
 }
 
 const BASE = "/artifacts";
 
 export async function loadArtifacts(): Promise<ArtifactBundle> {
-  const [meta, inverters, ledger, performance, causes, faults, tickets] = await Promise.all([
-    fetchJson<PlantMeta>("meta.json"),
-    fetchJson<InverterInfo[]>("inverters.json"),
-    fetchJson<LedgerEntry[]>("loss_ledger.json"),
-    fetchJson<Record<string, Performance>>("performance.json"),
-    fetchJson<Record<string, Cause>>("causes.json"),
-    fetchJson<Record<string, FaultSummary>>("faults.json"),
-    fetchJson<TicketEntry[]>("tickets.json"),
-  ]);
-  return { meta, inverters, ledger, performance, causes, faults, tickets };
+  const [meta, inverters, ledger, performance, causes, faults, tickets, metrics, degradation] =
+    await Promise.all([
+      fetchJson<PlantMeta>("meta.json"),
+      fetchJson<InverterInfo[]>("inverters.json"),
+      fetchJson<LedgerEntry[]>("loss_ledger.json"),
+      fetchJson<Record<string, Performance>>("performance.json"),
+      fetchJson<Record<string, Cause>>("causes.json"),
+      fetchJson<Record<string, FaultSummary>>("faults.json"),
+      fetchJson<TicketEntry[]>("tickets.json"),
+      fetchJson<ModelMetrics>("model_metrics.json"),
+      fetchJson<{ byModuleType: Record<string, ModuleTypeAgg> }>("degradation.json"),
+    ]);
+  return {
+    meta, inverters, ledger, performance, causes, faults, tickets,
+    metrics, moduleTypes: degradation.byModuleType,
+  };
 }
 
 async function fetchJson<T>(name: string): Promise<T> {

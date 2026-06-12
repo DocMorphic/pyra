@@ -17,12 +17,14 @@ export function ExecutiveReportApp() {
   if (loading) return <EmptyState icon="⏳" title="Compiling report…" />;
   if (error || !data) return <EmptyState title="No analytics yet" hint="Run the pipeline first." />;
 
-  const { meta, ledger } = data;
+  const { meta, ledger, metrics } = data;
   const top = ledger.slice(0, 5);
   const causeTotals = new Map<Cause, number>();
   for (const r of ledger) causeTotals.set(r.topCause, (causeTotals.get(r.topCause) ?? 0) + r.lostEur);
   const causes = [...causeTotals.entries()].sort((a, b) => b[1] - a[1]);
   const totalEur = meta.totalLostEur ?? 0;
+  const recon = metrics.reconciliation;
+  const lossPct = recon ? ((1 - 1 / recon.ratio) * 100).toFixed(1) : "—";
 
   return (
     <div className="custom-scrollbar h-full overflow-y-auto">
@@ -45,6 +47,10 @@ export function ExecutiveReportApp() {
           <div>
             <div className="text-[26px] font-bold leading-none">{eur(totalEur)}</div>
             <div className="text-[11px] opacity-70">revenue lost (curtailment-adjusted)</div>
+          </div>
+          <div>
+            <div className="text-[26px] font-bold leading-none">{eur(meta.recoverableEur ?? 0)}</div>
+            <div className="text-[11px] opacity-70">recoverable via O&amp;M</div>
           </div>
           <div>
             <div className="text-[26px] font-bold leading-none">{kwh(meta.totalLostKwh ?? 0)}</div>
@@ -105,6 +111,19 @@ export function ExecutiveReportApp() {
               </div>
             ))}
           </div>
+        </section>
+
+        <section className="rounded-lg px-3 py-2.5" style={{ background: "var(--color-info-box)", border: "1px solid var(--color-border)" }}>
+          <div className="ph-label mb-1">Methodology &amp; validation</div>
+          <p className="text-[11.5px] leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
+            Expected power: per-inverter ML trained on year 1, mean out-of-sample R²{" "}
+            <strong style={{ color: "var(--color-text)" }}>{meta.meanModelR2?.toFixed(2) ?? "—"}</strong>,
+            cross-checked against an independent pvlib physics model
+            ({metrics.medianPhysicsAgreement?.toFixed(2) ?? "—"}× agreement).
+            {recon && <> Inverter energy reconciles with the grid-feed meter to {recon.ratio.toFixed(3)}× ({lossPct}% transformer loss).</>}
+            {" "}Losses exclude curtailment (EVU/DV) and carry a 95% confidence interval.
+            Plant location {meta.location ? `${meta.location.lat}°N, ${meta.location.lon}°E` : "—"} recovered from solar-elevation telemetry.
+          </p>
         </section>
       </div>
     </div>

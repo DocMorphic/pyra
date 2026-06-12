@@ -73,6 +73,17 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
     showInExplorer: true,
     showInTaskbar: true,
   },
+  methods: {
+    id: "methods",
+    title: "Methods & Validation",
+    icon: "🔬",
+    defaultWidth: 600,
+    defaultHeight: 640,
+    defaultX: 300,
+    defaultY: 80,
+    showInExplorer: true,
+    showInTaskbar: true,
+  },
   report: {
     id: "report",
     title: "Executive Report",

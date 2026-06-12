@@ -30,38 +30,62 @@ async function buildContext(): Promise<string> {
   const read = async (f: string) =>
     JSON.parse(await readFile(path.join(dir, f), "utf8"));
 
-  const [meta, ledger, causes] = await Promise.all([
+  const [meta, ledger, causes, metrics, degradation] = await Promise.all([
     read("meta.json"),
     read("loss_ledger.json"),
     read("causes.json"),
+    read("model_metrics.json"),
+    read("degradation.json"),
   ]);
 
   const rows = ledger
     .map(
       (r: Record<string, unknown>, i: number) =>
-        `${i + 1}. ${r.inverterId}: lost €${Math.round(Number(r.lostEur))}, ` +
-        `health ${Math.round(Number(r.health) * 100)}%, cause ${r.topCause}, ` +
+        `${i + 1}. ${r.inverterId}: lost €${Math.round(Number(r.lostEur))} ` +
+        `(95% CI €${Math.round(Number(r.lostEurLo))}–€${Math.round(Number(r.lostEurHi))}), ` +
+        `health ${Math.round(Number(r.health) * 100)}%, degradation ${r.degradationRate ?? "?"}%/yr, ` +
+        `cause ${r.topCause}${r.onset ? ` (onset ${r.onset})` : ""}, ` +
         `module ${r.moduleType}, ${r.kWp}kWp, ${r.errorCount} errors`
     )
     .join("\n");
 
+  const mtRows = Object.entries(degradation.byModuleType || {})
+    .map(([t, raw]) => {
+      const v = raw as Record<string, unknown>;
+      return `- ${t}: ${v.count} inverters, median health ${v.medianHealth}, median degradation ${v.medianDegradationRate}%/yr, €${Math.round(Number(v.lostEur))} lost`;
+    })
+    .join("\n");
+
+  const recon = metrics.reconciliation;
+  const loc = metrics.location;
+
   const text = `# PLANT DATA — ${meta.plant}
 Inverters: ${meta.inverterCount} · Capacity: ${meta.totalKwp} kWp · Module types: ${meta.moduleTypes}
 Period: ${meta.dateStart} → ${meta.dateEnd}
+Location (recovered from solar-elevation telemetry): ${loc ? `${loc.lat}°N, ${loc.lon}°E` : "n/a"}
 Total revenue lost (curtailment-adjusted): €${Math.round(meta.totalLostEur ?? 0)} / ${Math.round(meta.totalLostKwh ?? 0)} kWh
+Of which recoverable via O&M: €${Math.round(meta.recoverableEur ?? 0)}; permanent (degradation): €${Math.round(meta.permanentEur ?? 0)}
 Worst inverter: ${meta.worstInverter}
+
+## Model validation (credibility)
+- Expected-power: per-inverter ML trained on year 1; mean out-of-sample R² ${meta.meanModelR2 ?? "?"}
+- Independent pvlib physics cross-check agreement (median): ${metrics.medianPhysicsAgreement ?? "?"}×
+- Plant-meter reconciliation: Σinverters ÷ grid-feed meter = ${recon ? recon.ratio : "?"}× (≈ transformer loss)
 
 ## Loss ledger (ranked by lost revenue; "health" = actual ÷ expected power)
 ${rows}
 
+## Degradation by module type
+${mtRows}
+
 ## Cause definitions
-- degradation: gradual yield decline vs the year-1 baseline
+- degradation: gradual yield decline vs the year-1 baseline (permanent)
 - outage: offline during production hours (model expects power, actual ~0)
 - fault: recurring inverter error codes correlated with lost production
 - curtailment: grid (EVU) or operator (DV) limited output — partly external
 - unattributed: underperformance with no single dominant signal
 
-Loss is computed as (expected − actual) energy over daylight, NON-curtailed intervals, valued at the per-week feed-in tariff. The expected-power model is trained per inverter on its first operating year.`;
+Loss = (expected − actual) energy over daylight, NON-curtailed intervals (EVU/DV excluded), valued at the per-week feed-in tariff, with a 95% confidence interval. The expected-power model is trained per inverter on its first operating year and cross-checked with pvlib physics.`;
 
   cached = { text, builtAt: Date.now() };
   return text;

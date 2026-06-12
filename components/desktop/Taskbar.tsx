@@ -10,6 +10,7 @@ const DOCK_APPS_ORDER = [
   "inspector",
   "timeline",
   "copilot",
+  "methods",
   "report",
   "settings",
 ];

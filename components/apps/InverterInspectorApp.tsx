@@ -18,16 +18,18 @@ export function InverterInspectorApp() {
 
   if (!entry || !perf) return <EmptyState title="Select an inverter" hint="Pick one from the Loss Ledger or Plant Map." />;
 
-  // uPlot aligned data: [x (unix s), expected, actual]
+  // uPlot aligned data: [x, hi, lo, expected, actual] — hi/lo form the CI band.
   const xs = perf.monthly.map((m) => Date.parse(`${m.t}-01T00:00:00Z`) / 1000);
   const chartData = [
     xs,
+    perf.monthly.map((m) => m.hi),
+    perf.monthly.map((m) => m.lo),
     perf.monthly.map((m) => m.expected),
     perf.monthly.map((m) => m.actual),
   ];
   const firstYear = perf.years[0]?.year;
   const lastYear = perf.years[perf.years.length - 1]?.year;
-  const degr = perf.years.length > 1 ? (1 - perf.years[perf.years.length - 1].norm) * 100 : 0;
+  const degrRate = entry.degradationRate;
 
   return (
     <div className="custom-scrollbar flex h-full flex-col overflow-y-auto">
@@ -52,27 +54,35 @@ export function InverterInspectorApp() {
 
       <div className="mb-3 flex gap-2">
         <Stat label="Health" value={`${(entry.health * 100).toFixed(0)}%`} tone={entry.health < 0.8 ? "error" : entry.health < 0.92 ? "warn" : "success"} />
-        <Stat label="Lost revenue" value={eur(entry.lostEur)} tone="error" />
-        <Stat label="Degradation" value={`${degr.toFixed(0)}%`} tone="warn" />
-        <Stat label="Errors" value={String(entry.errorCount)} />
+        <Stat label="Lost revenue" value={`${eur(entry.lostEur)}`} tone="error" />
+        <Stat label="Degradation /yr" value={degrRate != null ? `${degrRate.toFixed(2)}%` : "—"} tone="warn" />
+        <Stat label="Model R²" value={entry.modelR2 != null ? entry.modelR2.toFixed(2) : "—"} />
       </div>
 
       <div className="mb-1 flex items-center justify-between">
         <span className="text-[12px] font-medium" style={{ color: "var(--color-text)" }}>
-          Actual vs expected power (monthly mean kW)
+          Actual vs expected power (monthly mean kW) · {eur(entry.lostEurLo)}–{eur(entry.lostEurHi)} lost
         </span>
-        <span
-          className="rounded px-1.5 py-0.5 text-[10.5px]"
-          style={{ color: CAUSE_COLOR[entry.topCause], background: "var(--color-info-box)" }}
-        >
-          {CAUSE_LABEL[entry.topCause]}
-        </span>
+        <div className="flex items-center gap-1.5">
+          {entry.onset && (
+            <span className="badge error" title="Detected failure onset">onset {entry.onset}</span>
+          )}
+          <span
+            className="rounded px-1.5 py-0.5 text-[10.5px]"
+            style={{ color: CAUSE_COLOR[entry.topCause], background: "var(--color-info-box)" }}
+          >
+            {CAUSE_LABEL[entry.topCause]}
+          </span>
+        </div>
       </div>
       <UplotChart
-        height={200}
+        height={210}
         data={chartData}
+        bands={[{ series: [1, 2], fill: "rgba(245,78,0,0.10)" }]}
         series={[
-          { label: "Expected (yr-1 model)", stroke: "#9a9b92", dash: [5, 3], width: 1.5 },
+          { label: "CI hi", stroke: "transparent", width: 0 },
+          { label: "CI lo", stroke: "transparent", width: 0 },
+          { label: "Expected (yr-1 model ±95%)", stroke: "#9a9b92", dash: [5, 3], width: 1.5 },
           { label: "Actual", stroke: "#f54e00", width: 1.75 },
         ]}
       />
@@ -81,20 +91,23 @@ export function InverterInspectorApp() {
         Normalized yield by year (vs {firstYear} baseline)
       </div>
       <div className="mt-2 flex items-end gap-1.5" style={{ height: 90 }}>
-        {perf.years.map((y) => (
-          <div key={y.year} className="flex h-full flex-1 flex-col items-center justify-end" title={`${y.year}: PR ${(y.pr * 100).toFixed(0)}%`}>
+        {perf.years.map((y) => {
+          const pr = y.pr ?? 0;
+          return (
+          <div key={y.year} className="flex h-full flex-1 flex-col items-center justify-end" title={`${y.year}: PR ${(pr * 100).toFixed(0)}%${y.prTc != null ? ` · temp-corr ${(y.prTc * 100).toFixed(0)}%` : ""}`}>
             <div
               className="w-full rounded-t"
-              style={{ height: `${Math.max(2, y.pr * 100)}%`, background: healthColor(y.pr) }}
+              style={{ height: `${Math.max(2, pr * 100)}%`, background: healthColor(pr) }}
             />
             <span className="mt-1 text-[9px]" style={{ color: "var(--color-text-dim)" }}>
               {`'${String(y.year).slice(2)}`}
             </span>
           </div>
-        ))}
+          );
+        })}
       </div>
       <div className="mt-1 text-[10.5px]" style={{ color: "var(--color-text-dim)" }}>
-        Bar = performance ratio (actual ÷ expected) per year, {firstYear}–{lastYear}.
+        Bar = IEC 61724 Performance Ratio per year, {firstYear}–{lastYear}.
       </div>
     </div>
   );
