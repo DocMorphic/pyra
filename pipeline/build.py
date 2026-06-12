@@ -92,7 +92,8 @@ def main() -> None:
                SUM(l.p_ac) * ?                          AS e_kwh,
                COUNT(*)                                 AS n_samples,
                AVG(e.irradiance)                        AS mean_irr,
-               SUM(CASE WHEN COALESCE(e.evu,0) > 0 OR COALESCE(e.dv,0) > 0
+               SUM(CASE WHEN (e.evu IS NOT NULL AND e.evu < 99.5)
+                          OR (e.dv  IS NOT NULL AND e.dv  < 99.5)
                         THEN 1 ELSE 0 END)              AS n_curtailed
         FROM pac_long l
         JOIN read_parquet(?) e ON e.ts = l.ts
