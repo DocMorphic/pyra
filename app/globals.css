@@ -1,0 +1,441 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Body sans (Geist) is the default for body text. JetBrains Mono
+     handles catalog numbers / code. Fraunces is invoked explicitly
+     via the .font-display helper for marquee headings. */
+  --font-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-display: var(--font-display), Georgia, "Times New Roman", serif;
+
+  --color-accent-amber: #f59e0b;
+  --color-accent-cyan: #0891b2;
+
+  --radius-window: 8px;
+  --radius-button: 5px;
+}
+
+/* ============================================================
+   Pyra — Solar O&M console theme
+   Palette: deep night-blue surfaces, glassy panels, solar amber
+   accent. Day mode is a pale sky for bright rooms / projectors.
+   ============================================================ */
+:root,
+[data-theme="light"] {
+  /* Day mode — pale sky */
+  --color-bg: #eef2f8;
+  --color-surface: #ffffff;
+  --color-surface-solid: #ffffff;
+  --color-surface-alt: #f1f5f9;
+  --color-surface-hover: #e2e8f0;
+
+  --color-border: #dbe3ec;
+  --color-border-strong: #c2cdda;
+  --color-border-hover: #94a3b8;
+
+  --color-text: #0b1220;
+  --color-text-secondary: #1e293b;
+  --color-text-muted: #475569;
+  --color-text-dim: #94a3b8;
+
+  --color-tag-bg: #f1f5f9;
+  --color-tag-border: #dbe3ec;
+
+  --color-titlebar: #f8fafc;
+  --color-titlebar-border: #dbe3ec;
+
+  --color-input-bg: #ffffff;
+  --color-input-border: #c2cdda;
+
+  --color-window-shadow: rgba(15, 23, 42, 0.12);
+
+  --color-scrollbar: #c2cdda;
+  --color-scrollbar-hover: #94a3b8;
+
+  --color-info-box: #f1f5f9;
+
+  --color-error: #dc2626;
+
+  --color-link: #b45309;
+
+  /* OS chrome */
+  --color-menubar-bg: rgba(248, 250, 252, 0.85);
+  --color-menubar-border: #dbe3ec;
+  --color-menubar-text: #0b1220;
+  --color-menubar-hover: #f1f5f9;
+  --color-menubar-active: #e2e8f0;
+  --color-dock-bg: rgba(255, 255, 255, 0.9);
+  --color-dock-border: #dbe3ec;
+  --color-desktop-label: #1e293b;
+
+  /* Status colors */
+  --color-success: #15803d;
+  --color-warn: #b45309;
+
+  /* Default accent */
+  --color-accent: var(--color-accent-amber);
+  --color-button-dark: #0b1220;
+  --color-button-dark-hover: #1e293b;
+  --color-close-btn: #c2cdda;
+  --color-close-btn-hover: #ef4444;
+}
+
+/* Accent variants — switched via [data-accent] on <html>.
+   Combined with [data-theme] for higher specificity than the base
+   :root rules above, so the accent override always wins. */
+[data-theme="light"][data-accent="amber"] { --color-accent: #f59e0b; --color-link: #b45309; }
+[data-theme="light"][data-accent="gold"]  { --color-accent: #d97706; --color-link: #b45309; }
+[data-theme="light"][data-accent="cyan"]  { --color-accent: #0891b2; --color-link: #0e7490; }
+[data-theme="dark"][data-accent="amber"]  { --color-accent: #fbbf24; --color-link: #fbbf24; }
+[data-theme="dark"][data-accent="gold"]   { --color-accent: #f59e0b; --color-link: #f59e0b; }
+[data-theme="dark"][data-accent="cyan"]   { --color-accent: #22d3ee; --color-link: #22d3ee; }
+
+[data-theme="dark"] {
+  /* Night mode — deep blue desk */
+  --color-bg: #070b16;
+  --color-surface: rgba(20, 28, 46, 0.72);
+  --color-surface-solid: #131b2e;
+  --color-surface-alt: #1a2335;
+  --color-surface-hover: #243049;
+
+  --color-border: #243049;
+  --color-border-strong: #33415c;
+  --color-border-hover: #56688c;
+
+  --color-text: #eef2f8;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #8da2c0;
+  --color-text-dim: #56688c;
+
+  --color-tag-bg: #1a2335;
+  --color-tag-border: #33415c;
+
+  --color-titlebar: rgba(19, 27, 46, 0.92);
+  --color-titlebar-border: #243049;
+
+  --color-input-bg: #0d1424;
+  --color-input-border: #33415c;
+
+  --color-window-shadow: rgba(0, 0, 0, 0.55);
+
+  --color-scrollbar: #33415c;
+  --color-scrollbar-hover: #56688c;
+
+  --color-info-box: #1a2335;
+
+  --color-error: #f87171;
+  --color-link: #fbbf24;
+
+  --color-menubar-bg: rgba(10, 15, 28, 0.78);
+  --color-menubar-border: #243049;
+  --color-menubar-text: #eef2f8;
+  --color-menubar-hover: #1a2335;
+  --color-menubar-active: #243049;
+  --color-dock-bg: rgba(13, 20, 36, 0.82);
+  --color-dock-border: #33415c;
+  --color-desktop-label: #eef2f8;
+
+  --color-success: #4ade80;
+  --color-warn: #fbbf24;
+
+  --color-accent: #fbbf24;
+  --color-button-dark: #eef2f8;
+  --color-button-dark-hover: #cbd5e1;
+  --color-close-btn: #33415c;
+  --color-close-btn-hover: #ef4444;
+}
+
+/* === Base === */
+* { box-sizing: border-box; }
+
+button:not(:disabled) { cursor: pointer; }
+
+html {
+  background: var(--color-bg);
+  color: var(--color-text);
+  max-width: 100vw;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  max-width: 100vw;
+  overflow: hidden;
+  overscroll-behavior: none;
+  font-size: 13.5px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+/* Fraunces — used for marquee headings. Apply selectively. */
+.font-display {
+  font-family: var(--font-display), Georgia, "Times New Roman", serif;
+  letter-spacing: -0.018em;
+  font-feature-settings: "ss01", "ss02";
+}
+
+/* === Brightness === */
+.desktop-brightness {
+  filter: brightness(var(--display-brightness, 1));
+}
+
+/* === Wallpaper === */
+.desktop-wallpaper {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--color-bg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: background 0.3s ease;
+}
+
+/* === Scrollbar === */
+.custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--color-scrollbar-hover); }
+
+/* === Window open animation — macOS-style overshoot bounce ===
+   Close + minimize are intentionally instant (no animation) per
+   user preference; only open keeps the bounce. */
+.window-enter {
+  animation: windowOpen 0.26s cubic-bezier(0.34, 1.42, 0.64, 1);
+  transform-origin: center center;
+}
+
+@keyframes windowOpen {
+  from { opacity: 0; transform: scale(0.86); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* === Window control buttons — macOS traffic-light pattern ===
+   Each is a 12px circle with the canonical macOS colors and a subtle
+   1px border that gives them definition against the title bar.
+   The inner symbol (×, −, +) only renders on hover, identical to
+   macOS's behavior. The container (.window-titlebar-controls) has a
+   :hover rule below that reveals all three symbols at once when the
+   cursor enters the button group. */
+.window-control-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  color: transparent;
+  transition: filter 0.1s ease, transform 0.1s ease;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 50%;
+  padding: 0;
+}
+
+.window-titlebar-controls:hover .window-control-btn {
+  transform: scale(1.05);
+}
+
+.window-control-btn.close    { background: #FF5F57; }
+.window-control-btn.minimize { background: #FEBC2E; }
+.window-control-btn.maximize { background: #28C840; }
+
+/* When the user hovers anywhere over the button group, reveal symbols
+   in all three buttons (matches macOS). The reveal targets `color` so
+   the SVG strokes (currentColor) become visible. */
+.window-titlebar-controls:hover .window-control-btn {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.window-control-btn:active {
+  filter: brightness(0.9);
+}
+
+[data-theme="dark"] .window-control-btn {
+  border-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Hide scrollbar where needed */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Desktop icons */
+.desktop-icon {
+  will-change: transform;
+  transition: background 0.1s;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.desktop-icon:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+[data-theme="dark"] .desktop-icon:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.desktop-icon.dragging {
+  opacity: 0.6;
+  z-index: 100;
+  cursor: grabbing;
+}
+
+/* === Resize handle ===
+   Visible grip in the bottom-right corner so users discover that
+   windows are resizable. Three diagonal lines (classic OS pattern).
+   The hit area is slightly larger than the visual to make it easier
+   to grab. */
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  background: transparent;
+  z-index: 10;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 3px;
+  color: var(--color-text-muted);
+  opacity: 0.45;
+  transition: opacity 0.15s ease;
+}
+.resize-handle:hover {
+  opacity: 0.95;
+}
+
+/* === Boot screen === */
+.boot-screen {
+  animation: bootFade 0.4s ease-out 1.6s forwards;
+}
+
+@keyframes bootFade {
+  to { opacity: 0; pointer-events: none; }
+}
+
+.cursor-blink { animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-alt) 0%,
+    var(--color-surface-hover) 50%,
+    var(--color-surface-alt) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Dock */
+.dock-tooltip {
+  opacity: 0;
+  transform: translateX(-50%) translateY(4px);
+  transition: all 0.15s ease;
+  pointer-events: none;
+}
+.dock-item:hover .dock-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Menu dropdown */
+.menu-dropdown {
+  animation: menuSlide 0.12s ease-out;
+}
+@keyframes menuSlide {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .window-enter, .boot-screen { animation: none; }
+  .boot-screen { opacity: 0; pointer-events: none; }
+  .cursor-blink { animation: none; }
+  .skeleton { animation: none; }
+}
+
+/* Skip to content */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 9999;
+  padding: 8px 16px;
+  background: var(--color-accent);
+  color: white;
+  font-weight: 600;
+  border-radius: 4px;
+}
+.skip-to-content:focus { left: 8px; top: 8px; }
+
+/* Link styling */
+.content-link {
+  color: var(--color-link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+.content-link:hover {
+  color: var(--color-text);
+}
+
+/* Clean badge styling */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 4px;
+  background: var(--color-tag-bg);
+  border: 1px solid var(--color-tag-border);
+  color: var(--color-text-secondary);
+}
+.badge.success { background: rgba(21, 128, 61, 0.1); color: var(--color-success); border-color: rgba(21, 128, 61, 0.2); }
+.badge.warn { background: rgba(180, 83, 9, 0.1); color: var(--color-warn); border-color: rgba(180, 83, 9, 0.2); }
+.badge.error { background: rgba(185, 28, 28, 0.1); color: var(--color-error); border-color: rgba(185, 28, 28, 0.2); }
+.badge.accent { background: rgba(245, 158, 11, 0.1); color: var(--color-accent); border-color: rgba(245, 158, 11, 0.25); }
+
+/* Confidence meter (used in plan window) */
+.confidence-meter {
+  display: inline-block;
+  width: 60px;
+  height: 5px;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  overflow: hidden;
+  vertical-align: middle;
+}
+.confidence-meter > .fill {
+  display: block;             /* inline span ignored width % — block fixes it */
+  height: 100%;
+  background: var(--color-success);
+  transition: width 0.3s ease;
+}
+.confidence-meter > .fill.low { background: var(--color-error); }
+.confidence-meter > .fill.medium { background: var(--color-warn); }
