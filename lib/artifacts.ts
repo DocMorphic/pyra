@@ -53,25 +53,42 @@ export interface Performance {
   monthly: MonthPoint[];
 }
 
+export interface FaultSummary {
+  total: number;
+  monthly: { t: string; count: number }[];
+  topCodes: { code: string; description: string; count: number }[];
+}
+
+export interface TicketEntry {
+  start: string | null;
+  end: string | null;
+  component: string | null;
+  category: string | null;
+}
+
 export interface ArtifactBundle {
   meta: PlantMeta;
   inverters: InverterInfo[];
   ledger: LedgerEntry[];
   performance: Record<string, Performance>;
   causes: Record<string, Cause>;
+  faults: Record<string, FaultSummary>;
+  tickets: TicketEntry[];
 }
 
 const BASE = "/artifacts";
 
 export async function loadArtifacts(): Promise<ArtifactBundle> {
-  const [meta, inverters, ledger, performance, causes] = await Promise.all([
+  const [meta, inverters, ledger, performance, causes, faults, tickets] = await Promise.all([
     fetchJson<PlantMeta>("meta.json"),
     fetchJson<InverterInfo[]>("inverters.json"),
     fetchJson<LedgerEntry[]>("loss_ledger.json"),
     fetchJson<Record<string, Performance>>("performance.json"),
     fetchJson<Record<string, Cause>>("causes.json"),
+    fetchJson<Record<string, FaultSummary>>("faults.json"),
+    fetchJson<TicketEntry[]>("tickets.json"),
   ]);
-  return { meta, inverters, ledger, performance, causes };
+  return { meta, inverters, ledger, performance, causes, faults, tickets };
 }
 
 async function fetchJson<T>(name: string): Promise<T> {
