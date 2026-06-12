@@ -1,6 +1,6 @@
 "use client";
 
-import { AppHeader, Stat, EmptyState } from "./_shared";
+import { AppHeader, Stat, EmptyState, Sticker } from "./_shared";
 import { usePyraData } from "@/hooks/use-pyra-data";
 import { CAUSE_LABEL, CAUSE_COLOR, eur, kwh, healthColor } from "@/lib/artifacts";
 
@@ -18,6 +18,7 @@ export function LossLedgerApp() {
       <AppHeader
         title="Loss Ledger"
         subtitle="Lost revenue ranked by inverter · curtailment-adjusted"
+        right={ledger[0] && <Sticker color="var(--color-salmon)">worst: {ledger[0].inverterId.replace("INV ", "")} 😬</Sticker>}
       />
       <div className="mb-3 flex gap-2">
         <Stat label="Total lost €" value={eur(meta.totalLostEur ?? 0)} tone="error" />
@@ -68,8 +69,8 @@ export function LossLedgerApp() {
                   </td>
                   <td className="py-1.5">
                     <span
-                      className="rounded px-1.5 py-0.5 text-[10.5px]"
-                      style={{ color: CAUSE_COLOR[r.topCause], background: "var(--color-info-box)" }}
+                      className="rounded-full px-2 py-0.5 text-[10.5px] font-semibold"
+                      style={{ color: "#fff", background: CAUSE_COLOR[r.topCause] }}
                     >
                       {CAUSE_LABEL[r.topCause]}
                     </span>

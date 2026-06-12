@@ -1,6 +1,6 @@
 "use client";
 
-import { AppHeader, Stat, EmptyState } from "./_shared";
+import { AppHeader, Stat, EmptyState, Sticker } from "./_shared";
 import { usePyraData } from "@/hooks/use-pyra-data";
 import { eur, healthColor, CAUSE_LABEL } from "@/lib/artifacts";
 
@@ -18,7 +18,11 @@ export function PlantMapApp() {
 
   return (
     <div className="flex h-full flex-col">
-      <AppHeader title="Plant Map" subtitle={`${meta.plant} · inverter health heatmap`} />
+      <AppHeader
+        title="Plant Map"
+        subtitle={`${meta.plant} · inverter health heatmap`}
+        right={underperf > 0 && <Sticker color="var(--color-yellow)">{underperf} to watch 👀</Sticker>}
+      />
       <div className="mb-3 flex gap-2">
         <Stat label="Inverters" value={String(meta.inverterCount)} />
         <Stat label="Capacity" value={`${(meta.totalKwp / 1000).toFixed(2)} MWp`} />

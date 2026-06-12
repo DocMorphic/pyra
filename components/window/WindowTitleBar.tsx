@@ -102,10 +102,10 @@ export function WindowTitleBar({
 
       {/* Title — CENTER */}
       <span
-        className="pointer-events-none absolute left-1/2 -translate-x-1/2 truncate text-[12.5px]"
+        className="pointer-events-none absolute left-1/2 -translate-x-1/2 truncate text-[13px]"
         style={{
-          color: isFocused ? "var(--color-text-secondary)" : "var(--color-text-muted)",
-          fontWeight: 500,
+          color: isFocused ? "var(--color-text)" : "var(--color-text-muted)",
+          fontWeight: 700,
           maxWidth: "60%",
         }}
       >

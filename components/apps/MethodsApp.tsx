@@ -80,8 +80,11 @@ export function MethodsApp() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="mb-3">
-      <h3 className="mb-0.5 text-[12.5px] font-semibold" style={{ color: "var(--color-text)" }}>{title}</h3>
+    <div className="ph-section mb-2.5 p-3">
+      <div className="mb-1 flex items-center gap-2">
+        <span className="ph-bullet" style={{ background: "var(--color-accent)" }} />
+        <h3 className="text-[12.5px] font-bold" style={{ color: "var(--color-text)" }}>{title}</h3>
+      </div>
       <p className="text-[12px] leading-relaxed" style={{ color: "var(--color-text-muted)" }}>{children}</p>
     </div>
   );

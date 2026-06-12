@@ -14,21 +14,46 @@ export function AppHeader({
   right?: ReactNode;
 }) {
   return (
-    <div className="mb-3 flex items-start justify-between gap-3">
+    <div className="mb-4 flex items-start justify-between gap-3">
       <div>
         <h2
-          className="text-[15px] font-semibold leading-tight"
-          style={{ color: "var(--color-text)" }}
+          className="text-[21px] font-bold leading-tight"
+          style={{ color: "var(--color-text)", letterSpacing: "-0.015em" }}
         >
           {title}
         </h2>
         {subtitle && (
-          <p className="mt-0.5 text-[12px]" style={{ color: "var(--color-text-muted)" }}>
+          <p className="mt-1 text-[12.5px]" style={{ color: "var(--color-text-muted)" }}>
             {subtitle}
           </p>
         )}
       </div>
       {right}
+    </div>
+  );
+}
+
+/** Section heading with a colored square bullet (PostHog marker). */
+export function SectionTitle({ children, color = "var(--color-accent)" }: { children: ReactNode; color?: string }) {
+  return (
+    <div className="mb-2 flex items-center gap-2">
+      <span className="ph-bullet" style={{ background: color }} />
+      <h3 className="text-[14px] font-bold" style={{ color: "var(--color-text)" }}>{children}</h3>
+    </div>
+  );
+}
+
+/** Boxed section card (PostHog reporting card). */
+export function SectionCard({ title, color, right, children }: { title?: string; color?: string; right?: ReactNode; children: ReactNode }) {
+  return (
+    <div className="ph-section mb-3 p-3.5">
+      {title && (
+        <div className="mb-2 flex items-center justify-between">
+          <SectionTitle color={color}>{title}</SectionTitle>
+          {right}
+        </div>
+      )}
+      {children}
     </div>
   );
 }
@@ -81,16 +106,17 @@ export function Button({
   children: ReactNode;
   onClick?: () => void;
   type?: "button" | "submit";
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "gold";
   disabled?: boolean;
   className?: string;
 }) {
+  const v = variant === "primary" ? "" : variant;
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`ph-btn text-[12.5px] ${variant === "secondary" ? "secondary" : ""} ${className}`}
+      className={`ph-btn text-[12.5px] ${v} ${className}`}
     >
       {children}
     </button>
@@ -126,10 +152,15 @@ export function Stat({
       : tone === "accent"
       ? "var(--color-accent)"
       : "var(--color-text)";
+  const accent =
+    tone === "default" ? "var(--color-border-hover)" : color;
   return (
-    <div className="ph-card flex-1 px-3 py-2.5">
+    <div
+      className="ph-card flex-1 px-3.5 py-3"
+      style={{ borderBottom: `3px solid ${accent}` }}
+    >
       <div className="ph-label">{label}</div>
-      <div className="font-mono mt-1 text-[19px] font-bold tabular-nums leading-none" style={{ color }}>
+      <div className="font-mono mt-1.5 text-[23px] font-bold tabular-nums leading-none" style={{ color }}>
         {value}
       </div>
     </div>

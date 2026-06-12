@@ -5,6 +5,7 @@ import { useWindowManager } from "@/hooks/use-window-manager";
 import { useModal } from "@/hooks/use-modal";
 import { STORAGE_PREFIX } from "@/lib/constants";
 import { useClock } from "@/hooks/use-clock";
+import { Sunny } from "@/components/ui/Sunny";
 import { BrightnessPopover } from "./BrightnessPopover";
 
 const CMD_KEY =
@@ -68,20 +69,9 @@ export function MenuBar() {
       }}
     >
       <div className="flex items-stretch">
-        {/* Logo — Pyra sun mark, mirrors app/icon.svg */}
-        <div className="ml-3 mr-1 flex items-center">
-          <div
-            className="flex h-[18px] w-[18px] items-center justify-center"
-            style={{ background: "var(--color-accent)", borderRadius: 4 }}
-            aria-hidden
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="4.5" fill="white" />
-              <g stroke="white" strokeWidth="2" strokeLinecap="round">
-                <path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.2 5.2l1.8 1.8M17 17l1.8 1.8M18.8 5.2L17 7M7 17l-1.8 1.8" />
-              </g>
-            </svg>
-          </div>
+        {/* Logo — Sunny, Pyra's mascot */}
+        <div className="ml-3 mr-1 flex items-center" aria-hidden>
+          <Sunny size={22} />
         </div>
 
         <MenuButton
