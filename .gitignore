@@ -1,0 +1,29 @@
+# --- Pyra ---
+# Raw EnerParc dataset is RESTRICTED — never commit (Data Use Policy)
+/data/
+/pipeline/data/
+*.parquet
+*.xlsb
+*.xlsx
+*.csv
+
+# Generated analytics artifacts (regenerated locally)
+/app/public/artifacts/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.env*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
