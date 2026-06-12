@@ -1,147 +1,150 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Body sans (Geist) is the default for body text. JetBrains Mono
-     handles catalog numbers / code. Fraunces is invoked explicitly
-     via the .font-display helper for marquee headings. */
+  /* Manrope = body + display (friendly geometric grotesque, PostHog-ish).
+     JetBrains Mono = code / micro-labels. */
   --font-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
-  --font-display: var(--font-display), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
 
-  --color-accent-amber: #f59e0b;
-  --color-accent-cyan: #0891b2;
+  /* PostHog categorical accents */
+  --color-accent-orange: #f54e00;
+  --color-accent-blue: #1d4aff;
+  --color-accent-yellow: #dc9300;
 
-  --radius-window: 8px;
-  --radius-button: 5px;
+  --radius-window: 10px;
+  --radius-button: 8px;
 }
 
 /* ============================================================
-   Pyra — Solar O&M console theme
-   Palette: deep night-blue surfaces, glassy panels, solar amber
-   accent. Day mode is a pale sky for bright rooms / projectors.
+   Pyra — PostHog-style theme
+   Light: warm cream canvas, white cards, hard inky borders,
+   solid offset shadows, red-orange solar accent. Dark mirrors it.
    ============================================================ */
 :root,
 [data-theme="light"] {
-  /* Day mode — pale sky */
-  --color-bg: #eef2f8;
+  --color-bg: #eeefe9;            /* PostHog cream */
   --color-surface: #ffffff;
   --color-surface-solid: #ffffff;
-  --color-surface-alt: #f1f5f9;
-  --color-surface-hover: #e2e8f0;
+  --color-surface-alt: #f5f6f1;
+  --color-surface-hover: #e5e7e0;
 
-  --color-border: #dbe3ec;
-  --color-border-strong: #c2cdda;
-  --color-border-hover: #94a3b8;
+  --color-border: #d0d1c9;        /* subtle divider */
+  --color-border-strong: #bfbfbc;
+  --color-border-hover: #9a9b92;
+  --color-card-border: #1d1f1b;   /* hard card/window outline */
 
-  --color-text: #0b1220;
-  --color-text-secondary: #1e293b;
-  --color-text-muted: #475569;
-  --color-text-dim: #94a3b8;
+  --color-text: #151515;
+  --color-text-secondary: #2c2c2c;
+  --color-text-muted: #76766f;
+  --color-text-dim: #a8a89f;
 
-  --color-tag-bg: #f1f5f9;
-  --color-tag-border: #dbe3ec;
+  --color-tag-bg: #f0f1eb;
+  --color-tag-border: #d0d1c9;
 
-  --color-titlebar: #f8fafc;
-  --color-titlebar-border: #dbe3ec;
+  --color-titlebar: #f7f8f3;
+  --color-titlebar-border: #d0d1c9;
 
   --color-input-bg: #ffffff;
-  --color-input-border: #c2cdda;
+  --color-input-border: #c9cabf;
 
-  --color-window-shadow: rgba(15, 23, 42, 0.12);
+  /* Solid offset shadow — the PostHog "stacked card" signature */
+  --shadow-card: 4px 4px 0 rgba(21, 21, 21, 0.10);
+  --shadow-card-hover: 2px 2px 0 rgba(21, 21, 21, 0.12);
+  --shadow-ink: 3px 3px 0 #1d1f1b;
+  --color-window-shadow: rgba(21, 21, 21, 0.12);
 
-  --color-scrollbar: #c2cdda;
-  --color-scrollbar-hover: #94a3b8;
+  --color-scrollbar: #c9cabf;
+  --color-scrollbar-hover: #a8a89f;
 
-  --color-info-box: #f1f5f9;
+  --color-info-box: #f0f1eb;
 
-  --color-error: #dc2626;
-
-  --color-link: #b45309;
+  --color-error: #d7373f;
+  --color-link: #c5400c;
 
   /* OS chrome */
-  --color-menubar-bg: rgba(248, 250, 252, 0.85);
-  --color-menubar-border: #dbe3ec;
-  --color-menubar-text: #0b1220;
-  --color-menubar-hover: #f1f5f9;
-  --color-menubar-active: #e2e8f0;
-  --color-dock-bg: rgba(255, 255, 255, 0.9);
-  --color-dock-border: #dbe3ec;
-  --color-desktop-label: #1e293b;
+  --color-menubar-bg: rgba(238, 239, 233, 0.85);
+  --color-menubar-border: #d0d1c9;
+  --color-menubar-text: #151515;
+  --color-menubar-hover: #e5e7e0;
+  --color-menubar-active: #dadbd3;
+  --color-dock-bg: rgba(255, 255, 255, 0.92);
+  --color-dock-border: #1d1f1b;
+  --color-desktop-label: #2c2c2c;
 
-  /* Status colors */
-  --color-success: #15803d;
-  --color-warn: #b45309;
+  --color-success: #2f9e44;
+  --color-warn: #dc9300;
 
-  /* Default accent */
-  --color-accent: var(--color-accent-amber);
-  --color-button-dark: #0b1220;
-  --color-button-dark-hover: #1e293b;
-  --color-close-btn: #c2cdda;
+  --color-accent: var(--color-accent-orange);
+  --color-button-dark: #151515;
+  --color-button-dark-hover: #2c2c2c;
+  --color-close-btn: #c9cabf;
   --color-close-btn-hover: #ef4444;
 }
 
-/* Accent variants — switched via [data-accent] on <html>.
-   Combined with [data-theme] for higher specificity than the base
-   :root rules above, so the accent override always wins. */
-[data-theme="light"][data-accent="amber"] { --color-accent: #f59e0b; --color-link: #b45309; }
-[data-theme="light"][data-accent="gold"]  { --color-accent: #d97706; --color-link: #b45309; }
-[data-theme="light"][data-accent="cyan"]  { --color-accent: #0891b2; --color-link: #0e7490; }
-[data-theme="dark"][data-accent="amber"]  { --color-accent: #fbbf24; --color-link: #fbbf24; }
-[data-theme="dark"][data-accent="gold"]   { --color-accent: #f59e0b; --color-link: #f59e0b; }
-[data-theme="dark"][data-accent="cyan"]   { --color-accent: #22d3ee; --color-link: #22d3ee; }
+/* Accent variants — switched via [data-accent] on <html>. */
+[data-theme="light"][data-accent="orange"] { --color-accent: #f54e00; --color-link: #c5400c; }
+[data-theme="light"][data-accent="blue"]   { --color-accent: #1d4aff; --color-link: #1d4aff; }
+[data-theme="light"][data-accent="yellow"] { --color-accent: #b87b00; --color-link: #b07400; }
+[data-theme="dark"][data-accent="orange"]  { --color-accent: #ff5c1a; --color-link: #ff5c1a; }
+[data-theme="dark"][data-accent="blue"]    { --color-accent: #4e74ff; --color-link: #4e74ff; }
+[data-theme="dark"][data-accent="yellow"]  { --color-accent: #f1a82c; --color-link: #f1a82c; }
 
 [data-theme="dark"] {
-  /* Night mode — deep blue desk */
-  --color-bg: #070b16;
-  --color-surface: rgba(20, 28, 46, 0.72);
-  --color-surface-solid: #131b2e;
-  --color-surface-alt: #1a2335;
-  --color-surface-hover: #243049;
+  --color-bg: #151515;            /* PostHog ink */
+  --color-surface: #1e1e1e;
+  --color-surface-solid: #1c1c1c;
+  --color-surface-alt: #232323;
+  --color-surface-hover: #2c2c2c;
 
-  --color-border: #243049;
-  --color-border-strong: #33415c;
-  --color-border-hover: #56688c;
+  --color-border: #3a3a38;
+  --color-border-strong: #4b4b4b;
+  --color-border-hover: #5e5e5c;
+  --color-card-border: #000000;
 
-  --color-text: #eef2f8;
-  --color-text-secondary: #cbd5e1;
-  --color-text-muted: #8da2c0;
-  --color-text-dim: #56688c;
+  --color-text: #eeefe9;
+  --color-text-secondary: #d6d7d0;
+  --color-text-muted: #9a9b92;
+  --color-text-dim: #6e6e68;
 
-  --color-tag-bg: #1a2335;
-  --color-tag-border: #33415c;
+  --color-tag-bg: #232323;
+  --color-tag-border: #3a3a38;
 
-  --color-titlebar: rgba(19, 27, 46, 0.92);
-  --color-titlebar-border: #243049;
+  --color-titlebar: #1c1c1c;
+  --color-titlebar-border: #2c2c2c;
 
-  --color-input-bg: #0d1424;
-  --color-input-border: #33415c;
+  --color-input-bg: #1a1a1a;
+  --color-input-border: #3a3a38;
 
-  --color-window-shadow: rgba(0, 0, 0, 0.55);
+  --shadow-card: 4px 4px 0 rgba(0, 0, 0, 0.6);
+  --shadow-card-hover: 2px 2px 0 rgba(0, 0, 0, 0.6);
+  --shadow-ink: 3px 3px 0 #000000;
+  --color-window-shadow: rgba(0, 0, 0, 0.6);
 
-  --color-scrollbar: #33415c;
-  --color-scrollbar-hover: #56688c;
+  --color-scrollbar: #3a3a38;
+  --color-scrollbar-hover: #5e5e5c;
 
-  --color-info-box: #1a2335;
+  --color-info-box: #232323;
 
   --color-error: #f87171;
-  --color-link: #fbbf24;
+  --color-link: #ff5c1a;
 
-  --color-menubar-bg: rgba(10, 15, 28, 0.78);
-  --color-menubar-border: #243049;
-  --color-menubar-text: #eef2f8;
-  --color-menubar-hover: #1a2335;
-  --color-menubar-active: #243049;
-  --color-dock-bg: rgba(13, 20, 36, 0.82);
-  --color-dock-border: #33415c;
-  --color-desktop-label: #eef2f8;
+  --color-menubar-bg: rgba(21, 21, 21, 0.85);
+  --color-menubar-border: #2c2c2c;
+  --color-menubar-text: #eeefe9;
+  --color-menubar-hover: #232323;
+  --color-menubar-active: #2c2c2c;
+  --color-dock-bg: rgba(28, 28, 28, 0.92);
+  --color-dock-border: #000000;
+  --color-desktop-label: #eeefe9;
 
   --color-success: #4ade80;
-  --color-warn: #fbbf24;
+  --color-warn: #f1a82c;
 
-  --color-accent: #fbbf24;
-  --color-button-dark: #eef2f8;
-  --color-button-dark-hover: #cbd5e1;
-  --color-close-btn: #33415c;
+  --color-accent: #ff5c1a;
+  --color-button-dark: #eeefe9;
+  --color-button-dark-hover: #d6d7d0;
+  --color-close-btn: #3a3a38;
   --color-close-btn-hover: #ef4444;
 }
 
@@ -175,12 +178,48 @@ body {
   font-family: var(--font-mono), ui-monospace, monospace;
 }
 
-/* Fraunces — used for marquee headings. Apply selectively. */
+/* Display — Manrope, tight + bold (PostHog headings vibe) */
 .font-display {
-  font-family: var(--font-display), Georgia, "Times New Roman", serif;
-  letter-spacing: -0.018em;
-  font-feature-settings: "ss01", "ss02";
+  font-family: var(--font-sans), -apple-system, sans-serif;
+  letter-spacing: -0.02em;
+  font-weight: 700;
 }
+
+/* PostHog micro-label — uppercase mono caption */
+.ph-label {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* PostHog card — white surface, hard border, solid offset shadow */
+.ph-card {
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-card-border);
+  border-radius: var(--radius-button);
+  box-shadow: var(--shadow-card);
+}
+
+/* PostHog button — chunky, inky border, offset shadow that collapses */
+.ph-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1.5px solid var(--color-card-border);
+  border-radius: var(--radius-button);
+  background: var(--color-accent);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: var(--shadow-ink);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.ph-btn:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--color-card-border); }
+.ph-btn:active { transform: translate(3px, 3px); box-shadow: none; }
+.ph-btn:disabled { opacity: 0.55; box-shadow: var(--shadow-ink); transform: none; }
+.ph-btn.secondary { background: var(--color-surface); color: var(--color-text); }
 
 /* === Brightness === */
 .desktop-brightness {
@@ -208,9 +247,7 @@ body {
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--color-scrollbar-hover); }
 
-/* === Window open animation — macOS-style overshoot bounce ===
-   Close + minimize are intentionally instant (no animation) per
-   user preference; only open keeps the bounce. */
+/* === Window open animation — subtle overshoot === */
 .window-enter {
   animation: windowOpen 0.26s cubic-bezier(0.34, 1.42, 0.64, 1);
   transform-origin: center center;
@@ -221,13 +258,7 @@ body {
   100% { opacity: 1; transform: scale(1); }
 }
 
-/* === Window control buttons — macOS traffic-light pattern ===
-   Each is a 12px circle with the canonical macOS colors and a subtle
-   1px border that gives them definition against the title bar.
-   The inner symbol (×, −, +) only renders on hover, identical to
-   macOS's behavior. The container (.window-titlebar-controls) has a
-   :hover rule below that reveals all three symbols at once when the
-   cursor enters the button group. */
+/* === Window control buttons — macOS traffic-light pattern === */
 .window-control-btn {
   display: flex;
   align-items: center;
@@ -237,7 +268,7 @@ body {
   color: transparent;
   transition: filter 0.1s ease, transform 0.1s ease;
   cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(0, 0, 0, 0.18);
   border-radius: 50%;
   padding: 0;
 }
@@ -246,13 +277,10 @@ body {
   transform: scale(1.05);
 }
 
-.window-control-btn.close    { background: #FF5F57; }
-.window-control-btn.minimize { background: #FEBC2E; }
-.window-control-btn.maximize { background: #28C840; }
+.window-control-btn.close    { background: #ff5f57; }
+.window-control-btn.minimize { background: #febc2e; }
+.window-control-btn.maximize { background: #28c840; }
 
-/* When the user hovers anywhere over the button group, reveal symbols
-   in all three buttons (matches macOS). The reveal targets `color` so
-   the SVG strokes (currentColor) become visible. */
 .window-titlebar-controls:hover .window-control-btn {
   color: rgba(0, 0, 0, 0.55);
 }
@@ -262,7 +290,7 @@ body {
 }
 
 [data-theme="dark"] .window-control-btn {
-  border-color: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.22);
 }
 
 /* Hide scrollbar where needed */
@@ -279,13 +307,13 @@ body {
   will-change: transform;
   transition: background 0.1s;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 .desktop-icon:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(21, 21, 21, 0.05);
 }
 [data-theme="dark"] .desktop-icon:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.07);
 }
 .desktop-icon.dragging {
   opacity: 0.6;
@@ -293,11 +321,7 @@ body {
   cursor: grabbing;
 }
 
-/* === Resize handle ===
-   Visible grip in the bottom-right corner so users discover that
-   windows are resizable. Three diagonal lines (classic OS pattern).
-   The hit area is slightly larger than the visual to make it easier
-   to grab. */
+/* === Resize handle === */
 .resize-handle {
   position: absolute;
   bottom: 0;
@@ -402,25 +426,25 @@ body {
   color: var(--color-text);
 }
 
-/* Clean badge styling */
+/* PostHog-style badge — pill with hard border */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 8px;
+  padding: 2px 8px;
   font-size: 11px;
-  font-weight: 500;
-  border-radius: 4px;
+  font-weight: 600;
+  border-radius: 999px;
   background: var(--color-tag-bg);
   border: 1px solid var(--color-tag-border);
   color: var(--color-text-secondary);
 }
-.badge.success { background: rgba(21, 128, 61, 0.1); color: var(--color-success); border-color: rgba(21, 128, 61, 0.2); }
-.badge.warn { background: rgba(180, 83, 9, 0.1); color: var(--color-warn); border-color: rgba(180, 83, 9, 0.2); }
-.badge.error { background: rgba(185, 28, 28, 0.1); color: var(--color-error); border-color: rgba(185, 28, 28, 0.2); }
-.badge.accent { background: rgba(245, 158, 11, 0.1); color: var(--color-accent); border-color: rgba(245, 158, 11, 0.25); }
+.badge.success { background: rgba(47, 158, 68, 0.12); color: var(--color-success); border-color: rgba(47, 158, 68, 0.3); }
+.badge.warn { background: rgba(220, 147, 0, 0.14); color: var(--color-warn); border-color: rgba(220, 147, 0, 0.3); }
+.badge.error { background: rgba(215, 55, 63, 0.12); color: var(--color-error); border-color: rgba(215, 55, 63, 0.3); }
+.badge.accent { background: rgba(245, 78, 0, 0.12); color: var(--color-accent); border-color: rgba(245, 78, 0, 0.3); }
 
-/* Confidence meter (used in plan window) */
+/* Confidence meter */
 .confidence-meter {
   display: inline-block;
   width: 60px;
@@ -432,7 +456,7 @@ body {
   vertical-align: middle;
 }
 .confidence-meter > .fill {
-  display: block;             /* inline span ignored width % — block fixes it */
+  display: block;
   height: 100%;
   background: var(--color-success);
   transition: width 0.3s ease;

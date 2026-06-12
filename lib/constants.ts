@@ -9,8 +9,8 @@ export const STORAGE_KEYS = {
 } as const;
 
 export const DEFAULT_THEME = {
-  // Night-first: a solar O&M console reads best on a dark, glassy desk.
-  mode: "dark" as const,
+  // PostHog-style cream light mode by default; dark available via toggle.
+  mode: "light" as const,
   brightness: 100,
 };
 

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, JetBrains_Mono, Fraunces } from "next/font/google";
+import { Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -18,16 +18,7 @@ const manrope = Manrope({
   display: "swap",
 });
 
-// Display — Fraunces (variable serif). Used selectively for marquee
-// headings: boot screen, app titles, section headers.
-const fraunces = Fraunces({
-  variable: "--font-display",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-// Mono — JetBrains Mono. Replaces Geist Mono. Larger x-height + more
-// open digit shapes for catalog numbers and code blocks.
+// Mono — JetBrains Mono. Micro-labels, codes, tabular numbers.
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
@@ -58,7 +49,7 @@ export const metadata: Metadata = {
 // localStorage before React hydrates to prevent flash-of-unstyled-content.
 // useLocalStorage stores values JSON-stringified, so quotes are stripped.
 // No user input crosses this boundary; the literal string is safe to inline.
-const FOUC_INIT_SCRIPT = `(function(){try{var s=function(k,d){var v=localStorage.getItem(k);if(v==null)return d;return v.replace(/^"|"$/g,'');};var t=s('pyra:theme','dark');var a=s('pyra:accent','amber');var b=s('pyra:brightness','100');var d=document.documentElement;d.setAttribute('data-theme',t);d.setAttribute('data-accent',a);d.style.setProperty('--display-brightness',(parseInt(b,10)/100).toString())}catch(e){}})()`;
+const FOUC_INIT_SCRIPT = `(function(){try{var s=function(k,d){var v=localStorage.getItem(k);if(v==null)return d;return v.replace(/^"|"$/g,'');};var t=s('pyra:theme','light');var a=s('pyra:accent','orange');var b=s('pyra:brightness','100');var d=document.documentElement;d.setAttribute('data-theme',t);d.setAttribute('data-accent',a);d.style.setProperty('--display-brightness',(parseInt(b,10)/100).toString())}catch(e){}})()`;
 
 export default function RootLayout({
   children,
@@ -68,10 +59,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      data-theme="dark"
-      data-accent="amber"
+      data-theme="light"
+      data-accent="orange"
       suppressHydrationWarning
-      className={`${manrope.variable} ${jetbrainsMono.variable} ${fraunces.variable} h-full antialiased`}
+      className={`${manrope.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: FOUC_INIT_SCRIPT }} />

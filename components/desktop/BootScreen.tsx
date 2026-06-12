@@ -36,7 +36,7 @@ export function BootScreen() {
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center"
       style={{
-        background: "#050810",
+        background: "#eeefe9",
         opacity: fadeOut ? 0 : 1,
         transition: "opacity 0.35s ease-in",
         pointerEvents: fadeOut ? "none" : "auto",
@@ -48,9 +48,9 @@ export function BootScreen() {
         <svg width="200" height="150" viewBox="0 0 200 150" fill="none" aria-hidden>
           <defs>
             <radialGradient id="pyra-glow" cx="50%" cy="100%" r="75%">
-              <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.55" />
-              <stop offset="40%" stopColor="#f59e0b" stopOpacity="0.18" />
-              <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
+              <stop offset="0%" stopColor="#f54e00" stopOpacity="0.45" />
+              <stop offset="40%" stopColor="#f54e00" stopOpacity="0.14" />
+              <stop offset="100%" stopColor="#f54e00" stopOpacity="0" />
             </radialGradient>
             <clipPath id="pyra-horizon">
               <rect x="0" y="0" width="200" height="112" />
@@ -70,9 +70,9 @@ export function BootScreen() {
           {/* Sun + rays, clipped to above the horizon, rising up */}
           <g clipPath="url(#pyra-horizon)">
             <g style={{ animation: "sun-rise 1s cubic-bezier(0.22,1,0.36,1) 0.2s both" }}>
-              <circle cx="100" cy="112" r="22" fill="#fbbf24" />
-              <circle cx="100" cy="112" r="22" fill="none" stroke="#fde68a" strokeWidth="1.5" opacity="0.6" />
-              <g stroke="#fbbf24" strokeWidth="2.4" strokeLinecap="round">
+              <circle cx="100" cy="112" r="22" fill="#f54e00" />
+              <circle cx="100" cy="112" r="22" fill="none" stroke="#151515" strokeWidth="1.5" opacity="0.25" />
+              <g stroke="#f54e00" strokeWidth="2.4" strokeLinecap="round">
                 {Array.from({ length: 12 }).map((_, i) => {
                   const a = (i * 30 * Math.PI) / 180;
                   const r1 = 28;
@@ -98,7 +98,8 @@ export function BootScreen() {
             y1="112"
             x2="182"
             y2="112"
-            stroke="#33415c"
+            stroke="#151515"
+            strokeOpacity="0.35"
             strokeWidth="1.5"
             style={{
               strokeDasharray: 164,
@@ -113,14 +114,14 @@ export function BootScreen() {
           style={{ opacity: 0, animation: "wordmark-in 0.5s ease-out 1.15s forwards" }}
         >
           <div
-            className="font-display text-[32px]"
-            style={{ color: "#fef3c7", fontWeight: 600, letterSpacing: "0.02em" }}
+            className="font-display text-[34px]"
+            style={{ color: "#151515", fontWeight: 800, letterSpacing: "-0.02em" }}
           >
             Pyra
           </div>
           <div
             className="text-[10.5px] uppercase tracking-[0.22em]"
-            style={{ color: "#8da2c0" }}
+            style={{ color: "#76766f" }}
           >
             Solar Plant Intelligence
           </div>

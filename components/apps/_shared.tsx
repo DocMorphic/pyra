@@ -89,14 +89,9 @@ export function Stat({
       ? "var(--color-accent)"
       : "var(--color-text)";
   return (
-    <div
-      className="flex-1 rounded-lg px-3 py-2.5"
-      style={{ background: "var(--color-surface-alt)", border: "1px solid var(--color-border)" }}
-    >
-      <div className="text-[10px] uppercase tracking-wider" style={{ color: "var(--color-text-muted)" }}>
-        {label}
-      </div>
-      <div className="font-mono mt-0.5 text-[18px] font-semibold tabular-nums" style={{ color }}>
+    <div className="ph-card flex-1 px-3 py-2.5">
+      <div className="ph-label">{label}</div>
+      <div className="font-mono mt-1 text-[19px] font-bold tabular-nums leading-none" style={{ color }}>
         {value}
       </div>
     </div>

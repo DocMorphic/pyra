@@ -105,11 +105,12 @@ export const CAUSE_LABEL: Record<Cause, string> = {
   unknown: "Unattributed",
 };
 
+// PostHog categorical palette.
 export const CAUSE_COLOR: Record<Cause, string> = {
-  degradation: "var(--color-warn)",
-  outage: "var(--color-error)",
-  curtailment: "var(--color-accent)",
-  fault: "#e879f9",
+  degradation: "#dc9300", // yellow
+  outage: "#d7373f", // red
+  curtailment: "#1d4aff", // blue
+  fault: "#8f4fe8", // violet
   unknown: "var(--color-text-dim)",
 };
 
@@ -124,9 +125,9 @@ export const kwh = (n: number) => {
 
 /** Health → color ramp (green healthy → red bad). */
 export function healthColor(h: number): string {
-  if (h >= 0.95) return "#22c55e";
-  if (h >= 0.9) return "#84cc16";
-  if (h >= 0.8) return "#eab308";
-  if (h >= 0.65) return "#f97316";
-  return "#ef4444";
+  if (h >= 0.95) return "#2f9e44";
+  if (h >= 0.9) return "#74b816";
+  if (h >= 0.8) return "#dc9300";
+  if (h >= 0.65) return "#f76808";
+  return "#d7373f";
 }

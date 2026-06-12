@@ -8,9 +8,9 @@ interface BrightnessPopoverProps {
 }
 
 const ACCENTS: { value: AccentColor; swatch: string; label: string }[] = [
-  { value: "amber", swatch: "#f59e0b", label: "Solar amber" },
-  { value: "gold", swatch: "#fbbf24", label: "Gold" },
-  { value: "cyan", swatch: "#22d3ee", label: "Grid cyan" },
+  { value: "orange", swatch: "#f54e00", label: "Solar orange" },
+  { value: "blue", swatch: "#1d4aff", label: "Blue" },
+  { value: "yellow", swatch: "#dc9300", label: "Yellow" },
 ];
 
 export function BrightnessPopover({ onClose }: BrightnessPopoverProps) {

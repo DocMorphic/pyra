@@ -221,11 +221,11 @@ export function Window({
         height: windowState.size.height,
         zIndex: windowState.zIndex,
         background: "var(--color-surface-solid)",
-        border: "1px solid var(--color-border)",
+        border: "1.5px solid var(--color-card-border)",
         borderRadius: "var(--radius-window)",
         boxShadow: isFocused
-          ? "0 8px 24px var(--color-window-shadow), 0 1px 2px var(--color-window-shadow)"
-          : "0 4px 12px var(--color-window-shadow), 0 1px 2px var(--color-window-shadow)",
+          ? "6px 6px 0 var(--color-window-shadow)"
+          : "3px 3px 0 var(--color-window-shadow)",
       }}
       onMouseDown={() => focusWindow(appId)}
       role="dialog"

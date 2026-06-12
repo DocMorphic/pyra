@@ -5,8 +5,8 @@ import type { ThemeMode, ThemeState } from "@/lib/types";
 import { STORAGE_KEYS, DEFAULT_THEME } from "@/lib/constants";
 import { useLocalStorage } from "./use-local-storage";
 
-// Solar palette accents — warm by default, with a cool grid-cyan option.
-export type AccentColor = "amber" | "gold" | "cyan";
+// PostHog categorical accents.
+export type AccentColor = "orange" | "blue" | "yellow";
 
 interface ThemeContextValue extends ThemeState {
   accent: AccentColor;
@@ -30,7 +30,7 @@ export function useThemeProvider(): ThemeContextValue {
     STORAGE_KEYS.brightness,
     DEFAULT_THEME.brightness
   );
-  const [accent, setAccentRaw] = useLocalStorage<AccentColor>(STORAGE_KEYS.accent, "amber");
+  const [accent, setAccentRaw] = useLocalStorage<AccentColor>(STORAGE_KEYS.accent, "orange");
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", mode);
