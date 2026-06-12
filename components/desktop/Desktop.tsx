@@ -7,6 +7,7 @@ import {
   useWindowManagerProvider,
 } from "@/hooks/use-window-manager";
 import { ModalContext, useModalProvider } from "@/hooks/use-modal";
+import { PyraDataProvider } from "@/hooks/use-pyra-data";
 import { BootScreen } from "./BootScreen";
 import { MenuBar } from "./MenuBar";
 import { Taskbar } from "./Taskbar";
@@ -82,6 +83,7 @@ export function Desktop() {
     <ThemeContext value={theme}>
       <WindowManagerContext value={windowManager}>
         <ModalContext value={modal}>
+          <PyraDataProvider>
           <BootScreen />
           <div className="desktop-brightness relative h-dvh w-full select-none">
             <Wallpaper />
@@ -145,6 +147,7 @@ export function Desktop() {
               />
             )}
           </div>
+          </PyraDataProvider>
         </ModalContext>
       </WindowManagerContext>
     </ThemeContext>

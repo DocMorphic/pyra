@@ -19,7 +19,7 @@ import pandas as pd
 import sources as S
 
 OUT = Path(__file__).parent / "out"
-ART = Path(__file__).parent.parent / "app" / "public" / "artifacts"
+ART = Path(__file__).parent.parent / "public" / "artifacts"
 OUT.mkdir(exist_ok=True)
 ART.mkdir(parents=True, exist_ok=True)
 

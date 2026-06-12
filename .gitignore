@@ -7,8 +7,8 @@
 *.xlsx
 *.csv
 
-# Generated analytics artifacts (regenerated locally)
-/app/public/artifacts/
+# Generated analytics artifacts — derived from restricted data, regenerated locally
+/public/artifacts/
 
 # Node / Next.js
 node_modules/

@@ -1,27 +1,100 @@
 "use client";
 
-import { AppHeader, Stat } from "./_shared";
+import { AppHeader, Stat, EmptyState } from "./_shared";
+import { LineChart, Legend } from "./_charts";
+import { usePyraData } from "@/hooks/use-pyra-data";
+import { CAUSE_LABEL, CAUSE_COLOR, eur, healthColor } from "@/lib/artifacts";
 
 export function InverterInspectorApp() {
+  const { data, loading, error, selectedInverter, setSelectedInverter } = usePyraData();
+
+  if (loading) return <EmptyState icon="⏳" title="Loading…" />;
+  if (error || !data) return <EmptyState title="No analytics yet" hint="Run the pipeline first." />;
+
+  const id = selectedInverter ?? data.ledger[0]?.inverterId;
+  const entry = data.ledger.find((r) => r.inverterId === id);
+  const perf = id ? data.performance[id] : undefined;
+  const info = data.inverters.find((i) => i.inverterId === id);
+
+  if (!entry || !perf) return <EmptyState title="Select an inverter" hint="Pick one from the Loss Ledger or Plant Map." />;
+
+  const actualSeries = perf.monthly.map((m, i) => ({ x: i, y: m.actual }));
+  const expectedSeries = perf.monthly.map((m, i) => ({ x: i, y: m.expected }));
+  const firstYear = perf.years[0]?.year;
+  const lastYear = perf.years[perf.years.length - 1]?.year;
+  const degr = perf.years.length > 1 ? (1 - perf.years[perf.years.length - 1].norm) * 100 : 0;
+
   return (
-    <div className="flex h-full flex-col">
+    <div className="custom-scrollbar flex h-full flex-col overflow-y-auto">
       <AppHeader
         title="Inverter Inspector"
-        subtitle="Actual vs expected power · degradation · DC diagnostics"
+        subtitle={info ? `${info.moduleType} · ${info.kWp ?? "—"} kWp · ${info.strings ?? "—"} strings` : undefined}
+        right={
+          <select
+            value={id}
+            onChange={(e) => setSelectedInverter(e.target.value)}
+            className="font-mono rounded px-2 py-1 text-[12px] outline-none"
+            style={{ background: "var(--color-input-bg)", border: "1px solid var(--color-input-border)", color: "var(--color-text)" }}
+          >
+            {data.ledger.map((r) => (
+              <option key={r.inverterId} value={r.inverterId}>
+                {r.inverterId}
+              </option>
+            ))}
+          </select>
+        }
       />
+
       <div className="mb-3 flex gap-2">
-        <Stat label="Inverter" value="—" tone="accent" />
-        <Stat label="Health" value="—" />
-        <Stat label="Degradation/yr" value="—" tone="warn" />
+        <Stat label="Health" value={`${(entry.health * 100).toFixed(0)}%`} tone={entry.health < 0.8 ? "error" : entry.health < 0.92 ? "warn" : "success"} />
+        <Stat label="Lost revenue" value={eur(entry.lostEur)} tone="error" />
+        <Stat label="Degradation" value={`${degr.toFixed(0)}%`} tone="warn" />
+        <Stat label="Errors" value={String(entry.errorCount)} />
       </div>
-      <div
-        className="flex flex-1 items-center justify-center rounded-lg"
-        style={{ background: "var(--color-surface-alt)", border: "1px dashed var(--color-border-strong)" }}
-      >
-        <span className="px-6 text-center text-[12px]" style={{ color: "var(--color-text-muted)" }}>
-          Actual-vs-expected power chart and year-over-year degradation curve
-          render here. Open an inverter from the Loss Ledger or Plant Map.
+
+      <div className="mb-1 flex items-center justify-between">
+        <span className="text-[12px] font-medium" style={{ color: "var(--color-text)" }}>
+          Actual vs expected power (monthly mean kW)
         </span>
+        <span
+          className="rounded px-1.5 py-0.5 text-[10.5px]"
+          style={{ color: CAUSE_COLOR[entry.topCause], background: "var(--color-info-box)" }}
+        >
+          {CAUSE_LABEL[entry.topCause]}
+        </span>
+      </div>
+      <LineChart
+        height={190}
+        series={[
+          { label: "Expected", color: "var(--color-text-dim)", points: expectedSeries, dashed: true },
+          { label: "Actual", color: "var(--color-accent)", points: actualSeries },
+        ]}
+      />
+      <Legend
+        items={[
+          { label: "Expected (year-1 model)", color: "var(--color-text-dim)", dashed: true },
+          { label: "Actual", color: "var(--color-accent)" },
+        ]}
+      />
+
+      <div className="mt-4 text-[12px] font-medium" style={{ color: "var(--color-text)" }}>
+        Normalized yield by year (vs {firstYear} baseline)
+      </div>
+      <div className="mt-2 flex items-end gap-1.5" style={{ height: 90 }}>
+        {perf.years.map((y) => (
+          <div key={y.year} className="flex flex-1 flex-col items-center justify-end" title={`${y.year}: PR ${(y.pr * 100).toFixed(0)}%`}>
+            <div
+              className="w-full rounded-t"
+              style={{ height: `${Math.max(2, y.pr * 100)}%`, background: healthColor(y.pr) }}
+            />
+            <span className="mt-1 text-[9px]" style={{ color: "var(--color-text-dim)" }}>
+              {`'${String(y.year).slice(2)}`}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-1 text-[10.5px]" style={{ color: "var(--color-text-dim)" }}>
+        Bar = performance ratio (actual ÷ expected) per year, {firstYear}–{lastYear}.
       </div>
     </div>
   );

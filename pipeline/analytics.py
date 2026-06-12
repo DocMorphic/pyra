@@ -26,7 +26,7 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 import sources as S
 
 OUT = Path(__file__).parent / "out"
-ART = Path(__file__).parent.parent / "app" / "public" / "artifacts"
+ART = Path(__file__).parent.parent / "public" / "artifacts"
 
 INTERVAL_H = 5.0 / 60.0
 DAY_IRR = 20.0           # W/m² — above this we treat as productive daylight
