@@ -1,7 +1,7 @@
 "use client";
 
 import { AppHeader, Stat, EmptyState } from "./_shared";
-import { LineChart, Legend } from "./_charts";
+import { UplotChart } from "./_uplot";
 import { usePyraData } from "@/hooks/use-pyra-data";
 import { CAUSE_LABEL, CAUSE_COLOR, eur, healthColor } from "@/lib/artifacts";
 
@@ -18,8 +18,13 @@ export function InverterInspectorApp() {
 
   if (!entry || !perf) return <EmptyState title="Select an inverter" hint="Pick one from the Loss Ledger or Plant Map." />;
 
-  const actualSeries = perf.monthly.map((m, i) => ({ x: i, y: m.actual }));
-  const expectedSeries = perf.monthly.map((m, i) => ({ x: i, y: m.expected }));
+  // uPlot aligned data: [x (unix s), expected, actual]
+  const xs = perf.monthly.map((m) => Date.parse(`${m.t}-01T00:00:00Z`) / 1000);
+  const chartData = [
+    xs,
+    perf.monthly.map((m) => m.expected),
+    perf.monthly.map((m) => m.actual),
+  ];
   const firstYear = perf.years[0]?.year;
   const lastYear = perf.years[perf.years.length - 1]?.year;
   const degr = perf.years.length > 1 ? (1 - perf.years[perf.years.length - 1].norm) * 100 : 0;
@@ -63,17 +68,12 @@ export function InverterInspectorApp() {
           {CAUSE_LABEL[entry.topCause]}
         </span>
       </div>
-      <LineChart
-        height={190}
+      <UplotChart
+        height={200}
+        data={chartData}
         series={[
-          { label: "Expected", color: "var(--color-text-dim)", points: expectedSeries, dashed: true },
-          { label: "Actual", color: "var(--color-accent)", points: actualSeries },
-        ]}
-      />
-      <Legend
-        items={[
-          { label: "Expected (year-1 model)", color: "var(--color-text-dim)", dashed: true },
-          { label: "Actual", color: "var(--color-accent)" },
+          { label: "Expected (yr-1 model)", stroke: "#9a9b92", dash: [5, 3], width: 1.5 },
+          { label: "Actual", stroke: "#f54e00", width: 1.75 },
         ]}
       />
 
@@ -82,7 +82,7 @@ export function InverterInspectorApp() {
       </div>
       <div className="mt-2 flex items-end gap-1.5" style={{ height: 90 }}>
         {perf.years.map((y) => (
-          <div key={y.year} className="flex flex-1 flex-col items-center justify-end" title={`${y.year}: PR ${(y.pr * 100).toFixed(0)}%`}>
+          <div key={y.year} className="flex h-full flex-1 flex-col items-center justify-end" title={`${y.year}: PR ${(y.pr * 100).toFixed(0)}%`}>
             <div
               className="w-full rounded-t"
               style={{ height: `${Math.max(2, y.pr * 100)}%`, background: healthColor(y.pr) }}
