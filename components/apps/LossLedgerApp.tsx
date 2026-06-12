@@ -7,7 +7,7 @@ import { CAUSE_LABEL, CAUSE_COLOR, eur, kwh, healthColor } from "@/lib/artifacts
 export function LossLedgerApp() {
   const { data, loading, error, selectInverter, selectedInverter } = usePyraData();
 
-  if (loading) return <EmptyState icon="⏳" title="Loading analytics…" />;
+  if (loading) return <EmptyState showCmd={false} title="Herding photons…" />;
   if (error || !data)
     return <EmptyState title="No analytics yet" hint="Run the pipeline to generate the loss ledger." />;
 

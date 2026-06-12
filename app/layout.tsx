@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, JetBrains_Mono } from "next/font/google";
+import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -10,17 +10,18 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-// Body — Manrope. Distinctive rounded geometric grotesque with notable
-// character at small sizes; visibly different from Inter/Geist.
-const manrope = Manrope({
+// Body + headings — IBM Plex Sans (PostHog's website typeface).
+const plexSans = IBM_Plex_Sans({
   variable: "--font-sans",
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   display: "swap",
 });
 
-// Mono — JetBrains Mono. Micro-labels, codes, tabular numbers.
-const jetbrainsMono = JetBrains_Mono({
+// Mono — IBM Plex Mono. Micro-labels, codes, tabular numbers.
+const plexMono = IBM_Plex_Mono({
   variable: "--font-mono",
+  weight: ["400", "500", "600"],
   subsets: ["latin"],
   display: "swap",
 });
@@ -62,7 +63,7 @@ export default function RootLayout({
       data-theme="light"
       data-accent="orange"
       suppressHydrationWarning
-      className={`${manrope.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${plexSans.variable} ${plexMono.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: FOUC_INIT_SCRIPT }} />

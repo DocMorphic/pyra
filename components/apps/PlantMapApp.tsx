@@ -7,7 +7,7 @@ import { eur, healthColor, CAUSE_LABEL } from "@/lib/artifacts";
 export function PlantMapApp() {
   const { data, loading, error, selectInverter, selectedInverter } = usePyraData();
 
-  if (loading) return <EmptyState icon="⏳" title="Loading plant…" />;
+  if (loading) return <EmptyState showCmd={false} title="Herding photons…" />;
   if (error || !data)
     return <EmptyState title="No analytics yet" hint="Run the pipeline to map the plant." />;
 

@@ -55,7 +55,7 @@ export function UplotChart({
     const axisColor = cssVar(el, "--color-text-dim", "#94a3b8");
     const gridColor = cssVar(el, "--color-border", "#dbe3ec");
     const tickColor = cssVar(el, "--color-border", "#dbe3ec");
-    const font = '11px ui-monospace, SFMono-Regular, monospace';
+    const font = '11px "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace';
 
     const uSeries: uPlot.Series[] = [
       {}, // x

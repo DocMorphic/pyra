@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { Sunny } from "@/components/ui/Sunny";
 
 /** Section heading used across Pyra app windows. */
 export function AppHeader({
@@ -32,25 +33,23 @@ export function AppHeader({
   );
 }
 
-/** Empty state shown until the Python pipeline emits artifacts. */
+/** Empty state — Sunny shows up with a wink. */
 export function EmptyState({
-  icon = "☀️",
   title,
   hint,
+  mood = "happy",
+  showCmd = true,
 }: {
   icon?: string;
   title: string;
   hint?: string;
+  mood?: "happy" | "worried";
+  showCmd?: boolean;
 }) {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
-      <div
-        className="flex h-12 w-12 items-center justify-center rounded-full text-[22px]"
-        style={{ background: "var(--color-surface-alt)", border: "1px solid var(--color-border)" }}
-      >
-        {icon}
-      </div>
-      <div className="text-[13px] font-medium" style={{ color: "var(--color-text)" }}>
+      <Sunny size={72} mood={mood} />
+      <div className="mt-1 text-[13px] font-semibold" style={{ color: "var(--color-text)" }}>
         {title}
       </div>
       {hint && (
@@ -58,13 +57,52 @@ export function EmptyState({
           {hint}
         </div>
       )}
-      <code
-        className="font-mono mt-1 rounded px-2 py-1 text-[11px]"
-        style={{ background: "var(--color-info-box)", color: "var(--color-text-secondary)" }}
-      >
-        python pipeline/build.py
-      </code>
+      {showCmd && (
+        <code
+          className="font-mono mt-1 rounded px-2 py-1 text-[11px]"
+          style={{ background: "var(--color-info-box)", color: "var(--color-text-secondary)", border: "1px solid var(--color-border)" }}
+        >
+          python pipeline/build.py
+        </code>
+      )}
     </div>
+  );
+}
+
+/** PostHog-style pill button. */
+export function Button({
+  children,
+  onClick,
+  type = "button",
+  variant = "primary",
+  disabled,
+  className = "",
+}: {
+  children: ReactNode;
+  onClick?: () => void;
+  type?: "button" | "submit";
+  variant?: "primary" | "secondary";
+  disabled?: boolean;
+  className?: string;
+}) {
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`ph-btn text-[12.5px] ${variant === "secondary" ? "secondary" : ""} ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** Small rotated hand-stuck sticker. */
+export function Sticker({ children, color = "var(--color-yellow)" }: { children: ReactNode; color?: string }) {
+  return (
+    <span className="ph-sticker" style={{ background: color }}>
+      {children}
+    </span>
   );
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { AppHeader, Stat, EmptyState } from "./_shared";
+import { AppHeader, Stat, EmptyState, Sticker } from "./_shared";
 import { UplotChart } from "./_uplot";
 import { usePyraData } from "@/hooks/use-pyra-data";
 import { CAUSE_LABEL, CAUSE_COLOR, eur, healthColor } from "@/lib/artifacts";
@@ -8,7 +8,7 @@ import { CAUSE_LABEL, CAUSE_COLOR, eur, healthColor } from "@/lib/artifacts";
 export function InverterInspectorApp() {
   const { data, loading, error, selectedInverter, setSelectedInverter } = usePyraData();
 
-  if (loading) return <EmptyState icon="⏳" title="Loading…" />;
+  if (loading) return <EmptyState showCmd={false} title="Herding photons…" />;
   if (error || !data) return <EmptyState title="No analytics yet" hint="Run the pipeline first." />;
 
   const id = selectedInverter ?? data.ledger[0]?.inverterId;
@@ -16,7 +16,7 @@ export function InverterInspectorApp() {
   const perf = id ? data.performance[id] : undefined;
   const info = data.inverters.find((i) => i.inverterId === id);
 
-  if (!entry || !perf) return <EmptyState title="Select an inverter" hint="Pick one from the Loss Ledger or Plant Map." />;
+  if (!entry || !perf) return <EmptyState showCmd={false} mood="happy" title="Pick an inverter" hint="Click one in the Loss Ledger or Plant Map." />;
 
   // uPlot aligned data: [x, hi, lo, expected, actual] — hi/lo form the CI band.
   const xs = perf.monthly.map((m) => Date.parse(`${m.t}-01T00:00:00Z`) / 1000);
@@ -63,7 +63,10 @@ export function InverterInspectorApp() {
         <span className="text-[12px] font-medium" style={{ color: "var(--color-text)" }}>
           Actual vs expected power (monthly mean kW) · {eur(entry.lostEurLo)}–{eur(entry.lostEurHi)} lost
         </span>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
+          {degrRate != null && degrRate <= -1.5 && (
+            <Sticker color="var(--color-salmon)">{degrRate.toFixed(1)}%/yr 📉</Sticker>
+          )}
           {entry.onset && (
             <span className="badge error" title="Detected failure onset">onset {entry.onset}</span>
           )}

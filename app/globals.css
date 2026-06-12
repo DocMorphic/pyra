@@ -1,151 +1,158 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Manrope = body + display (friendly geometric grotesque, PostHog-ish).
-     JetBrains Mono = code / micro-labels. */
+  /* IBM Plex Sans = body + headings (PostHog's typeface). IBM Plex Mono = labels/code. */
   --font-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
   --font-display: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
 
-  /* PostHog categorical accents */
-  --color-accent-orange: #f54e00;
-  --color-accent-blue: #1d4aff;
-  --color-accent-yellow: #dc9300;
+  /* PostHog bright categorical palette (from their tailwind config) */
+  --color-red: #f54e00;
+  --color-blue: #2f80fa;
+  --color-yellow: #f7a501;
+  --color-orange: #eb9d2a;
+  --color-salmon: #f35454;
+  --color-teal: #29dbbb;
+  --color-seagreen: #30abc6;
+  --color-green: #6aa84f;
+  --color-purple: #b62ad9;
 
-  --radius-window: 10px;
-  --radius-button: 8px;
+  --radius-window: 8px;
+  --radius-card: 6px;
+  --radius-pill: 20px;
+  --radius-button: 6px;
 }
 
 /* ============================================================
-   Pyra — PostHog-style theme
-   Light: warm cream canvas, white cards, hard inky borders,
-   solid offset shadows, red-orange solar accent. Dark mirrors it.
+   Pyra — PostHog theme (tokens from PostHog/posthog.com)
+   Light: cream canvas, near-white cards, THIN light-gray 1px
+   borders, soft shadows, bright red-orange primary. Dark mirrors.
    ============================================================ */
 :root,
 [data-theme="light"] {
-  --color-bg: #eeefe9;            /* PostHog cream */
-  --color-surface: #ffffff;
+  --color-bg: #eeefe9;            /* light-2 cream */
+  --color-surface: #fdfdf8;       /* light-1 */
   --color-surface-solid: #ffffff;
-  --color-surface-alt: #f5f6f1;
-  --color-surface-hover: #e5e7e0;
+  --color-surface-alt: #f4f5ef;
+  --color-surface-hover: #e5e7e0; /* light-3 */
 
-  --color-border: #d0d1c9;        /* subtle divider */
-  --color-border-strong: #bfbfbc;
-  --color-border-hover: #9a9b92;
-  --color-card-border: #1d1f1b;   /* hard card/window outline */
+  --color-border: #d0d1c9;        /* light-8 — thin divider */
+  --color-border-strong: #c8cac1; /* light-5 */
+  --color-border-hover: #9ea096;  /* light-10 */
+  --color-card-border: #d2d3cc;   /* light-4 — soft card outline (NOT black) */
 
   --color-text: #151515;
-  --color-text-secondary: #2c2c2c;
-  --color-text-muted: #76766f;
-  --color-text-dim: #a8a89f;
+  --color-text-secondary: #23251d; /* light-12 */
+  --color-text-muted: #73756b;     /* light-9 */
+  --color-text-dim: #9ea096;       /* light-10 */
 
-  --color-tag-bg: #f0f1eb;
+  --color-tag-bg: #f4f5ef;
   --color-tag-border: #d0d1c9;
 
-  --color-titlebar: #f7f8f3;
+  --color-titlebar: #f4f5ef;
   --color-titlebar-border: #d0d1c9;
 
   --color-input-bg: #ffffff;
-  --color-input-border: #c9cabf;
+  --color-input-border: #c8cac1;
 
-  /* Solid offset shadow — the PostHog "stacked card" signature */
-  --shadow-card: 4px 4px 0 rgba(21, 21, 21, 0.10);
-  --shadow-card-hover: 2px 2px 0 rgba(21, 21, 21, 0.12);
-  --shadow-ink: 3px 3px 0 #1d1f1b;
-  --color-window-shadow: rgba(21, 21, 21, 0.12);
+  /* Soft shadows (PostHog) + a pushable bottom shadow for buttons */
+  --shadow-card: 0 1px 2px rgba(21, 21, 21, 0.06), 0 1px 1px rgba(21, 21, 21, 0.04);
+  --shadow-card-hover: 0 4px 12px rgba(21, 21, 21, 0.10);
+  --shadow-btn: 0 2px 0 rgba(21, 21, 21, 0.18);
+  --color-window-shadow: rgba(21, 21, 21, 0.10);
 
-  --color-scrollbar: #c9cabf;
-  --color-scrollbar-hover: #a8a89f;
+  --color-scrollbar: #c8cac1;
+  --color-scrollbar-hover: #9ea096;
 
-  --color-info-box: #f0f1eb;
+  --color-info-box: #f4f5ef;
 
-  --color-error: #d7373f;
-  --color-link: #c5400c;
+  --color-error: #f54e00;
+  --color-link: #2f80fa;
 
   /* OS chrome */
-  --color-menubar-bg: rgba(238, 239, 233, 0.85);
+  --color-menubar-bg: rgba(238, 239, 233, 0.9);
   --color-menubar-border: #d0d1c9;
   --color-menubar-text: #151515;
   --color-menubar-hover: #e5e7e0;
   --color-menubar-active: #dadbd3;
-  --color-dock-bg: rgba(255, 255, 255, 0.92);
-  --color-dock-border: #1d1f1b;
-  --color-desktop-label: #2c2c2c;
+  --color-dock-bg: rgba(253, 253, 248, 0.92);
+  --color-dock-border: #d0d1c9;
+  --color-desktop-label: #23251d;
 
-  --color-success: #2f9e44;
-  --color-warn: #dc9300;
+  --color-success: #6aa84f;
+  --color-warn: #f7a501;
 
-  --color-accent: var(--color-accent-orange);
+  --color-accent: #f54e00;        /* red — primary */
   --color-button-dark: #151515;
   --color-button-dark-hover: #2c2c2c;
-  --color-close-btn: #c9cabf;
-  --color-close-btn-hover: #ef4444;
+  --color-close-btn: #c8cac1;
+  --color-close-btn-hover: #f35454;
 }
 
 /* Accent variants — switched via [data-accent] on <html>. */
-[data-theme="light"][data-accent="orange"] { --color-accent: #f54e00; --color-link: #c5400c; }
-[data-theme="light"][data-accent="blue"]   { --color-accent: #1d4aff; --color-link: #1d4aff; }
-[data-theme="light"][data-accent="yellow"] { --color-accent: #b87b00; --color-link: #b07400; }
-[data-theme="dark"][data-accent="orange"]  { --color-accent: #ff5c1a; --color-link: #ff5c1a; }
-[data-theme="dark"][data-accent="blue"]    { --color-accent: #4e74ff; --color-link: #4e74ff; }
-[data-theme="dark"][data-accent="yellow"]  { --color-accent: #f1a82c; --color-link: #f1a82c; }
+[data-theme="light"][data-accent="red"]    { --color-accent: #f54e00; }
+[data-theme="light"][data-accent="blue"]   { --color-accent: #2f80fa; }
+[data-theme="light"][data-accent="yellow"] { --color-accent: #d98c00; }
+[data-theme="dark"][data-accent="red"]     { --color-accent: #ff5c1a; }
+[data-theme="dark"][data-accent="blue"]    { --color-accent: #4e93ff; }
+[data-theme="dark"][data-accent="yellow"]  { --color-accent: #f7a501; }
 
 [data-theme="dark"] {
-  --color-bg: #151515;            /* PostHog ink */
-  --color-surface: #1e1e1e;
-  --color-surface-solid: #1c1c1c;
-  --color-surface-alt: #232323;
-  --color-surface-hover: #2c2c2c;
+  --color-bg: #1e1f23;            /* PostHog dark */
+  --color-surface: #232429;       /* accent-dark */
+  --color-surface-solid: #232429;
+  --color-surface-alt: #2a2c32;
+  --color-surface-hover: #32343b;
 
-  --color-border: #3a3a38;
-  --color-border-strong: #4b4b4b;
-  --color-border-hover: #5e5e5c;
-  --color-card-border: #000000;
+  --color-border: #35373d;
+  --color-border-strong: #43454d;
+  --color-border-hover: #5b5e67;
+  --color-card-border: #35373d;
 
   --color-text: #eeefe9;
   --color-text-secondary: #d6d7d0;
-  --color-text-muted: #9a9b92;
-  --color-text-dim: #6e6e68;
+  --color-text-muted: #9698a0;
+  --color-text-dim: #6b6e78;
 
-  --color-tag-bg: #232323;
-  --color-tag-border: #3a3a38;
+  --color-tag-bg: #2a2c32;
+  --color-tag-border: #35373d;
 
-  --color-titlebar: #1c1c1c;
-  --color-titlebar-border: #2c2c2c;
+  --color-titlebar: #232429;
+  --color-titlebar-border: #35373d;
 
-  --color-input-bg: #1a1a1a;
-  --color-input-border: #3a3a38;
+  --color-input-bg: #1a1b1f;
+  --color-input-border: #35373d;
 
-  --shadow-card: 4px 4px 0 rgba(0, 0, 0, 0.6);
-  --shadow-card-hover: 2px 2px 0 rgba(0, 0, 0, 0.6);
-  --shadow-ink: 3px 3px 0 #000000;
-  --color-window-shadow: rgba(0, 0, 0, 0.6);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-card-hover: 0 6px 18px rgba(0, 0, 0, 0.5);
+  --shadow-btn: 0 2px 0 rgba(0, 0, 0, 0.5);
+  --color-window-shadow: rgba(0, 0, 0, 0.5);
 
-  --color-scrollbar: #3a3a38;
-  --color-scrollbar-hover: #5e5e5c;
+  --color-scrollbar: #43454d;
+  --color-scrollbar-hover: #5b5e67;
 
-  --color-info-box: #232323;
+  --color-info-box: #2a2c32;
 
-  --color-error: #f87171;
-  --color-link: #ff5c1a;
+  --color-error: #ff7e54;
+  --color-link: #4e93ff;
 
-  --color-menubar-bg: rgba(21, 21, 21, 0.85);
-  --color-menubar-border: #2c2c2c;
+  --color-menubar-bg: rgba(30, 31, 35, 0.9);
+  --color-menubar-border: #35373d;
   --color-menubar-text: #eeefe9;
-  --color-menubar-hover: #232323;
-  --color-menubar-active: #2c2c2c;
-  --color-dock-bg: rgba(28, 28, 28, 0.92);
-  --color-dock-border: #000000;
+  --color-menubar-hover: #2a2c32;
+  --color-menubar-active: #32343b;
+  --color-dock-bg: rgba(35, 36, 41, 0.92);
+  --color-dock-border: #35373d;
   --color-desktop-label: #eeefe9;
 
-  --color-success: #4ade80;
-  --color-warn: #f1a82c;
+  --color-success: #5fb04a;
+  --color-warn: #f7a501;
 
   --color-accent: #ff5c1a;
   --color-button-dark: #eeefe9;
   --color-button-dark-hover: #d6d7d0;
-  --color-close-btn: #3a3a38;
-  --color-close-btn-hover: #ef4444;
+  --color-close-btn: #43454d;
+  --color-close-btn-hover: #f35454;
 }
 
 /* === Base === */
@@ -194,32 +201,61 @@ body {
   color: var(--color-text-muted);
 }
 
-/* PostHog card — white surface, hard border, solid offset shadow */
+/* PostHog card — near-white surface, thin light border, soft shadow */
 .ph-card {
   background: var(--color-surface);
-  border: 1.5px solid var(--color-card-border);
-  border-radius: var(--radius-button);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
 }
 
-/* PostHog button — chunky, inky border, offset shadow that collapses */
+/* PostHog button — pill, bright fill, subtle pushable bottom shadow */
 .ph-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  border: 1.5px solid var(--color-card-border);
-  border-radius: var(--radius-button);
+  padding: 7px 16px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
   background: var(--color-accent);
   color: #fff;
   font-weight: 600;
-  box-shadow: var(--shadow-ink);
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  box-shadow: var(--shadow-btn);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
 }
-.ph-btn:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--color-card-border); }
-.ph-btn:active { transform: translate(3px, 3px); box-shadow: none; }
-.ph-btn:disabled { opacity: 0.55; box-shadow: var(--shadow-ink); transform: none; }
-.ph-btn.secondary { background: var(--color-surface); color: var(--color-text); }
+.ph-btn:hover { filter: brightness(1.05); }
+.ph-btn:active { transform: translateY(2px); box-shadow: none; }
+.ph-btn:disabled { opacity: 0.5; box-shadow: var(--shadow-btn); transform: none; filter: none; }
+.ph-btn.secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border-hover);
+}
+
+/* Dashed section divider (PostHog technical-paper feel) */
+.ph-divider {
+  border: none;
+  border-top: 1px dashed var(--color-border-hover);
+  margin: 14px 0;
+}
+
+/* Small rotated hand-stuck sticker/badge */
+.ph-sticker {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  font-weight: 600;
+  border: 1.5px solid var(--color-text);
+  border-radius: var(--radius-pill);
+  background: var(--color-yellow);
+  color: #151515;
+  transform: rotate(-3deg);
+  box-shadow: 1px 1px 0 var(--color-text);
+}
 
 /* === Brightness === */
 .desktop-brightness {

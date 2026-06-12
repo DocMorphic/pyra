@@ -14,7 +14,7 @@ const ACTION: Record<Cause, string> = {
 
 export function ExecutiveReportApp() {
   const { data, loading, error } = usePyraData();
-  if (loading) return <EmptyState icon="⏳" title="Compiling report…" />;
+  if (loading) return <EmptyState showCmd={false} title="Compiling…" />;
   if (error || !data) return <EmptyState title="No analytics yet" hint="Run the pipeline first." />;
 
   const { meta, ledger, metrics } = data;

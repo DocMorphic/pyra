@@ -1,40 +1,46 @@
 "use client";
 
+import { Sunny } from "@/components/ui/Sunny";
+import { Sticker } from "./_shared";
+
 export function AboutApp() {
   return (
-    <div className="flex h-full flex-col items-center px-6 py-4 text-center">
-      <div
-        className="flex h-14 w-14 items-center justify-center rounded-2xl"
-        style={{ background: "var(--color-accent)" }}
-      >
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="4.5" fill="#fff" />
-          <g stroke="#fff" strokeWidth="2" strokeLinecap="round">
-            <path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.2 5.2l1.8 1.8M17 17l1.8 1.8M18.8 5.2L17 7M7 17l-1.8 1.8" />
-          </g>
-        </svg>
-      </div>
+    <div className="custom-scrollbar flex h-full flex-col items-center overflow-y-auto px-6 py-5 text-center">
+      <Sunny size={84} />
 
-      <h1 className="font-display mt-3 text-[24px] font-semibold" style={{ color: "var(--color-text)" }}>
+      <h1 className="font-display mt-3 text-[26px] font-bold" style={{ color: "var(--color-text)" }}>
         Pyra
       </h1>
-      <p className="text-[11px] uppercase tracking-[0.2em]" style={{ color: "var(--color-text-muted)" }}>
+      <p className="font-mono text-[10.5px] uppercase tracking-[0.18em]" style={{ color: "var(--color-text-muted)" }}>
         Solar Plant Intelligence
       </p>
 
-      <p className="mt-4 max-w-[400px] text-[12.5px] leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
-        Pyra is a digital-twin O&M console for utility-scale solar. It learns each
-        inverter&apos;s expected power from its first year of operation, benchmarks a
-        decade of real telemetry against it, and surfaces the underperformance that
-        Performance Ratio hides.
+      <div className="mt-3">
+        <Sticker color="var(--color-teal)">powered by photons ☀</Sticker>
+      </div>
+
+      <p className="mt-5 max-w-[420px] text-[12.5px] leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
+        Hi, I&apos;m <strong>Sunny</strong> — half hedgehog, half sunbeam, fully obsessed with
+        solar inverters. I learn what each inverter&apos;s power <em>should</em> look like from
+        its first healthy year, then watch a decade of real data for the moment it starts
+        slacking.
       </p>
-      <p className="mt-3 max-w-[400px] text-[12.5px] leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
-        It doesn&apos;t just detect — it <strong>explains</strong> the cause from error
-        codes and tickets, <strong>quantifies</strong> the euros lost (curtailment-adjusted),
-        and turns each finding into an <strong>O&M action</strong>.
+      <p className="mt-3 max-w-[420px] text-[12.5px] leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
+        Performance Ratio tells you a plant is underperforming. Pyra tells you{" "}
+        <strong>which inverter</strong>, <strong>since when</strong>, <strong>why</strong>, and{" "}
+        <strong>how many euros</strong> it&apos;s quietly costing you — then hands it to your O&amp;M
+        team as an action.
       </p>
 
-      <div className="mt-auto pt-4 text-[10.5px]" style={{ color: "var(--color-text-dim)" }}>
+      <hr className="ph-divider w-full max-w-[420px]" />
+
+      <p className="max-w-[420px] text-[11.5px] leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
+        Every number is cross-checked against an independent physics model, validated on held-out
+        data with confidence intervals, and reconciled against the plant&apos;s own grid meter. No
+        hand-waving. (Okay, a little hand-waving — I have tiny paws.)
+      </p>
+
+      <div className="mt-auto pt-5 text-[10.5px]" style={{ color: "var(--color-text-dim)" }}>
         Energy × AI Hackathon · EnerParc Digital-Twin challenge
       </div>
     </div>

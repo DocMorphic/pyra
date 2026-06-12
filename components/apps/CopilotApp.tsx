@@ -114,21 +114,17 @@ export function CopilotApp() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={busy}
-          placeholder={busy ? "Waiting for reply…" : "Ask the Copilot…"}
-          className="flex-1 rounded-lg px-3 py-2 text-[12.5px] outline-none disabled:opacity-60"
+          placeholder={busy ? "Sunny's thinking…" : "Ask Sunny anything…"}
+          className="flex-1 px-3.5 py-2 text-[12.5px] outline-none disabled:opacity-60"
           style={{
             background: "var(--color-input-bg)",
             border: "1px solid var(--color-input-border)",
             color: "var(--color-text)",
+            borderRadius: "var(--radius-pill)",
           }}
         />
-        <button
-          type="submit"
-          disabled={busy}
-          className="rounded-lg px-3 py-2 text-[12.5px] font-medium disabled:opacity-60"
-          style={{ background: "var(--color-accent)", color: "#fff" }}
-        >
-          Send
+        <button type="submit" disabled={busy} className="ph-btn text-[12.5px]">
+          Ask
         </button>
       </form>
     </div>

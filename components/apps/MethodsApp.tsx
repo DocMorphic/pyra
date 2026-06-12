@@ -6,7 +6,7 @@ import { eur, kwh } from "@/lib/artifacts";
 
 export function MethodsApp() {
   const { data, loading, error } = usePyraData();
-  if (loading) return <EmptyState icon="⏳" title="Loading…" />;
+  if (loading) return <EmptyState showCmd={false} title="Herding photons…" />;
   if (error || !data) return <EmptyState title="No analytics yet" hint="Run the pipeline first." />;
 
   const { metrics, moduleTypes } = data;
