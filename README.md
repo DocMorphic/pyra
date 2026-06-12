@@ -24,7 +24,7 @@ npm install
 
 # 2. Python pipeline deps (one-time)
 python3 -m venv .venv && . .venv/bin/activate
-pip install pandas pyarrow duckdb openpyxl numpy scikit-learn
+pip install pandas pyarrow duckdb openpyxl numpy scikit-learn pvlib scipy
 
 # 3. Point at the local dataset (defaults to the hackathon Downloads path)
 export PYRA_DATA="/path/to/EP-Challenge-Final/Plant A (start here)"
