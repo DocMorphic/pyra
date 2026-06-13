@@ -105,7 +105,7 @@ export function UplotChart({
       series: uSeries,
       axes,
       bands: bands?.map((b) => ({ series: b.series, fill: b.fill })),
-      legend: { show: true, live: true },
+      legend: { show: false },
       cursor: { points: { size: 6 } },
       padding: [8, 8, 0, 0],
     };

@@ -90,7 +90,19 @@ export function InverterInspectorApp() {
         ]}
       />
 
-      <div className="mt-4 text-[12px] font-medium" style={{ color: "var(--color-text)" }}>
+      {/* compact legend */}
+      <div className="mt-2 flex flex-wrap items-center gap-4 text-[11px]" style={{ color: "var(--color-text-muted)" }}>
+        <span className="flex items-center gap-1.5">
+          <span style={{ width: 16, height: 0, borderTop: "2px dashed #9a9b92", display: "inline-block" }} />
+          Expected (yr-1 model, ±95% band)
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span style={{ width: 16, height: 0, borderTop: "2px solid #f54e00", display: "inline-block" }} />
+          Actual
+        </span>
+      </div>
+
+      <div className="mt-5 text-[12px] font-medium" style={{ color: "var(--color-text)" }}>
         Normalized yield by year (vs {firstYear} baseline)
       </div>
       <div className="mt-2 flex items-end gap-1.5" style={{ height: 90 }}>

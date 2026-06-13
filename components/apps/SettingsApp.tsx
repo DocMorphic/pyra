@@ -31,7 +31,7 @@ export function SettingsApp() {
   const { openWindow } = useWindowManager();
 
   return (
-    <div className="custom-scrollbar h-full space-y-4 overflow-y-auto">
+    <div className="custom-scrollbar h-full space-y-4 overflow-y-auto overflow-x-hidden">
       <Row label="Theme">
         <Toggle
           options={[{ v: "light", l: "☀ Day" }, { v: "dark", l: "☾ Night" }]}
@@ -95,11 +95,11 @@ export function SettingsApp() {
 
       <hr className="ph-divider" />
 
-      <div className="flex items-center justify-between">
-        <div className="text-[11.5px]" style={{ color: "var(--color-text-muted)" }}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0 flex-1 text-[11.5px]" style={{ color: "var(--color-text-muted)" }}>
           Pyra v0.1 · Energy × AI Hackathon · EnerParc
         </div>
-        <div className="flex gap-2">
+        <div className="flex shrink-0 gap-2">
           <button className="ph-btn secondary text-[12px]" onClick={() => openWindow("about")}>About</button>
           <button className="ph-btn red text-[12px]" onClick={resetSystem}>Reset PyraOS</button>
         </div>
