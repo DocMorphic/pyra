@@ -39,7 +39,7 @@ warnings.filterwarnings("ignore")
 OUT = S.OUT
 ART = S.ART
 
-INTERVAL_H = 5.0 / 60.0
+INTERVAL_H = S.interval_h()
 DAY_IRR = 20.0
 CURTAIL_AVAIL = 99.5
 G_REF = 1000.0           # W/m² reference irradiance for PR

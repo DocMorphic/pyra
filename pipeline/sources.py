@@ -5,6 +5,7 @@ PYRA_DATA at the local dataset root; defaults to the hackathon Downloads path.
 """
 from __future__ import annotations
 
+import json
 import os
 import re
 from pathlib import Path
@@ -49,6 +50,20 @@ else:
 # Timestamps are stored as strings like "2016.12.31 22:00".
 TS_FORMAT = "%Y.%m.%d %H:%M"
 INV_RE = re.compile(r"INV \d{2}\.\d{2}\.\d{3}")
+
+
+def interval_h(default: float = 5.0 / 60.0) -> float:
+    """Telemetry sample interval in hours. For uploaded sessions ingest.py
+    detects the real cadence and records it in capabilities.json; the demo
+    keeps the native 5-minute default. ALL kWh/€ totals scale with this, so a
+    wrong value silently corrupts every figure — hence it's detected, not assumed.
+    """
+    if SESSION:
+        try:
+            return float(json.loads((ART / "capabilities.json").read_text())["intervalH"])
+        except Exception:
+            return default
+    return default
 
 
 def check_data_present() -> None:

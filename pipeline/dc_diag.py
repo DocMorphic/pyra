@@ -35,7 +35,7 @@ warnings.filterwarnings("ignore")
 OUT = S.OUT
 ART = S.ART
 
-INTERVAL_H = 5.0 / 60.0
+INTERVAL_H = S.interval_h()
 DAY_IRR = 50.0           # W/m² — daylight floor for loading rows
 CAL_LO, CAL_HI = 150.0, 750.0   # irradiance band for I_DC calibration (avoid clipping)
 CURTAIL_AVAIL = 99.5

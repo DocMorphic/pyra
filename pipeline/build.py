@@ -23,7 +23,7 @@ ART = S.ART
 OUT.mkdir(parents=True, exist_ok=True)
 ART.mkdir(parents=True, exist_ok=True)
 
-SAMPLE_INTERVAL_H = 5.0 / 60.0  # 5-minute telemetry → hours per sample
+SAMPLE_INTERVAL_H = S.interval_h()  # hours per sample (detected for sessions; 5 min for the demo)
 
 
 def log(msg: str) -> None:
@@ -56,10 +56,16 @@ def main() -> None:
     """)
 
     # --- inverter_metadata -------------------------------------------------
-    meta = S.load_system_overview().drop_duplicates("inverterId").reset_index(drop=True)
-    # keep only inverters that actually appear in the monitoring data
-    meta = meta[meta["inverterId"].isin(inv_ids)].reset_index(drop=True)
-    meta.to_parquet(OUT / "inverter_metadata.parquet", index=False)
+    # Uploaded sessions: ingest.py pre-writes metadata (kWp estimated from peak
+    # power when no system-overview was provided). Demo: build it from the xlsx.
+    meta_path = OUT / "inverter_metadata.parquet"
+    if S.SESSION and meta_path.exists():
+        meta = pd.read_parquet(meta_path)
+        meta = meta[meta["inverterId"].isin(inv_ids)].reset_index(drop=True)
+    else:
+        meta = S.load_system_overview().drop_duplicates("inverterId").reset_index(drop=True)
+        meta = meta[meta["inverterId"].isin(inv_ids)].reset_index(drop=True)
+        meta.to_parquet(meta_path, index=False)
     log(f"inverter_metadata: {len(meta)} rows")
 
     # --- plant_env (environment + grid + curtailment) ----------------------
@@ -120,6 +126,12 @@ def main() -> None:
 
 
 def build_error_events(con, inv_ids: list[str]) -> None:
+    # Datasets without an error track (common for uploads) → empty events.
+    if not S.ERRORCODES_PARQUET.exists():
+        pd.DataFrame(columns=["inverter_id", "ts", "code", "description"]).to_parquet(
+            OUT / "error_events.parquet", index=False)
+        log("error_events: no error track for this dataset → empty")
+        return
     EP = str(S.ERRORCODES_PARQUET)
     cols = [c[0] for c in con.execute(
         f"DESCRIBE SELECT * FROM read_parquet('{EP}')"
@@ -150,12 +162,16 @@ def build_error_events(con, inv_ids: list[str]) -> None:
         ORDER BY ts
     """).df()
 
-    desc = pd.read_excel(S.ERRORCODES_DESC)
-    desc.columns = ["component", "hex", "decimal", "description"][: len(desc.columns)]
-    desc["decimal"] = pd.to_numeric(desc["decimal"], errors="coerce")
-    desc_map = dict(zip(desc["decimal"].dropna().astype("int64").astype(str),
-                        desc["description"]))
-    hex_map = dict(zip(desc["hex"].astype(str), desc["description"]))
+    # Code→description map (optional — without it codes read as "Unknown code").
+    desc_map: dict[str, str] = {}
+    hex_map: dict[str, str] = {}
+    if S.ERRORCODES_DESC.exists():
+        desc = pd.read_excel(S.ERRORCODES_DESC)
+        desc.columns = ["component", "hex", "decimal", "description"][: len(desc.columns)]
+        desc["decimal"] = pd.to_numeric(desc["decimal"], errors="coerce")
+        desc_map = dict(zip(desc["decimal"].dropna().astype("int64").astype(str),
+                            desc["description"]))
+        hex_map = dict(zip(desc["hex"].astype(str), desc["description"]))
 
     def describe(code: str) -> str:
         c = str(code).strip()
@@ -169,6 +185,13 @@ def build_error_events(con, inv_ids: list[str]) -> None:
 
 
 def build_tariffs() -> None:
+    # Sessions: ingest.py pre-writes a flat tariffs.parquet; keep it.
+    if not S.TARIFFS_XLSX.exists():
+        if not (OUT / "tariffs.parquet").exists():
+            pd.DataFrame(columns=["inverter_id", "week_start", "eurocent_per_kwh"]).to_parquet(
+                OUT / "tariffs.parquet", index=False)
+        log("tariffs: using provided/empty (no tariff sheet)")
+        return
     raw = pd.read_excel(S.TARIFFS_XLSX, header=None)
     # row 0 = junk header, row 1 = weekly dates, rows 2+ = per-inverter tariffs.
     dates = pd.to_datetime(raw.iloc[1, 1:], errors="coerce")
@@ -187,6 +210,13 @@ def build_tariffs() -> None:
 
 
 def build_tickets() -> None:
+    # Sessions: ingest.py pre-writes tickets.parquet (often empty); keep it.
+    if not S.TICKETS_XLSX.exists():
+        if not (OUT / "tickets.parquet").exists():
+            pd.DataFrame(columns=["start", "end", "component", "category"]).to_parquet(
+                OUT / "tickets.parquet", index=False)
+        log("tickets: using provided/empty (no tickets sheet)")
+        return
     frames = []
     xl = pd.ExcelFile(S.TICKETS_XLSX)
     if "2020-2026" in xl.sheet_names:
