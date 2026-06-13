@@ -158,6 +158,7 @@ def main() -> None:
     has_plant = "plant_pac" in df.columns
 
     ledger, performance, causes, metrics = [], {}, {}, {}
+    daily_frames = []   # per-inverter daily expected/actual/loss → out/daily_expected.parquet
     plant_inv_kwh = 0.0
     total_lost_eur = 0.0
 
@@ -212,6 +213,11 @@ def main() -> None:
         day["loss_eur"] = day["loss_kwh"] * day["eur_per_kwh"]
         lost_kwh = float(day["loss_kwh"].sum())
         lost_eur = float(day["loss_eur"].sum())
+        # persist this inverter's daily expected/actual/loss for downstream
+        # modules (fault economics, risk, simulator) — computed once, here.
+        df_keep = day[["date", "act_e", "exp_e", "loss_kwh", "loss_eur", "eur_per_kwh"]].copy()
+        df_keep.insert(0, "inverter_id", inv)
+        daily_frames.append(df_keep)
         # CI on attributed lost energy: daily residuals are ~independent, so the
         # uncertainty on the multi-day sum scales with √(n_days), not n_days.
         n_days = max(len(day), 1)
@@ -329,6 +335,11 @@ def main() -> None:
                 "plantMeterKwh": round(plant_kwh, 0),
                 "ratio": round(plant_inv_kwh / plant_kwh, 3),
             }
+
+    if daily_frames:
+        daily_all = pd.concat(daily_frames, ignore_index=True)
+        daily_all.to_parquet(OUT / "daily_expected.parquet", index=False)
+        log(f"daily_expected: {len(daily_all):,} inverter-days persisted")
 
     ART.mkdir(parents=True, exist_ok=True)
     (ART / "loss_ledger.json").write_text(json.dumps(ledger, indent=2))
