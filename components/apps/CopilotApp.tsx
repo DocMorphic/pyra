@@ -1,12 +1,98 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { AppHeader } from "./_shared";
 import { usePyraData } from "@/hooks/use-pyra-data";
 
 interface Msg {
   role: "user" | "assistant";
   text: string;
+}
+
+// --- tiny markdown renderer (the Copilot replies in markdown) -------------
+function inline(text: string): ReactNode[] {
+  const out: ReactNode[] = [];
+  const re = /(\*\*([^*]+)\*\*|`([^`]+)`)/g;
+  let last = 0, m: RegExpExecArray | null, k = 0;
+  while ((m = re.exec(text))) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    if (m[2] !== undefined) out.push(<strong key={k++} style={{ color: "var(--color-text)" }}>{m[2]}</strong>);
+    else out.push(
+      <code key={k++} className="font-mono rounded px-1 text-[11px]"
+        style={{ background: "var(--color-info-box)", color: "var(--color-text-secondary)" }}>{m[3]}</code>
+    );
+    last = re.lastIndex;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
+
+const BLOCK_START = /^(\||#{1,6}\s|[-*]\s|\d+\.\s)/;
+
+function Markdown({ text }: { text: string }) {
+  const lines = text.replace(/\r/g, "").split("\n");
+  const blocks: ReactNode[] = [];
+  let i = 0, key = 0;
+  const td = "px-2 py-1 text-left align-top";
+  while (i < lines.length) {
+    const t = lines[i].trim();
+    if (!t) { i++; continue; }
+
+    if (t.startsWith("|")) {                                   // table
+      const rows: string[] = [];
+      while (i < lines.length && lines[i].trim().startsWith("|")) { rows.push(lines[i].trim()); i++; }
+      const cells = rows
+        .filter((r) => !/^\|?[\s:|-]+\|?$/.test(r))            // drop |---|---| separators
+        .map((r) => r.replace(/^\||\|$/g, "").split("|").map((c) => c.trim()));
+      if (cells.length) {
+        const [head, ...body] = cells;
+        blocks.push(
+          <div key={key++} className="custom-scrollbar overflow-x-auto">
+            <table className="w-full border-collapse text-[11.5px]">
+              <thead><tr style={{ color: "var(--color-text-muted)" }}>
+                {head.map((c, j) => <th key={j} className={`${td} font-medium`}>{inline(c)}</th>)}
+              </tr></thead>
+              <tbody>{body.map((r, ri) => (
+                <tr key={ri} style={{ borderTop: "1px solid var(--color-border)" }}>
+                  {r.map((c, j) => <td key={j} className={`${td} tabular-nums`}>{inline(c)}</td>)}
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
+        );
+      }
+      continue;
+    }
+
+    const h = /^(#{1,6})\s+(.*)$/.exec(t);                     // heading
+    if (h) {
+      blocks.push(<div key={key++} className="text-[13px] font-bold" style={{ color: "var(--color-text)" }}>{inline(h[2])}</div>);
+      i++; continue;
+    }
+
+    if (/^[-*]\s+/.test(t)) {                                  // bullet list
+      const items: string[] = [];
+      while (i < lines.length && /^[-*]\s+/.test(lines[i].trim())) { items.push(lines[i].trim().replace(/^[-*]\s+/, "")); i++; }
+      blocks.push(<ul key={key++} className="ml-1 space-y-0.5">{items.map((it, j) => (
+        <li key={j} className="flex gap-1.5"><span style={{ color: "var(--color-accent)" }}>•</span><span>{inline(it)}</span></li>
+      ))}</ul>);
+      continue;
+    }
+
+    if (/^\d+\.\s+/.test(t)) {                                 // numbered list
+      const items: string[] = [];
+      while (i < lines.length && /^\d+\.\s+/.test(lines[i].trim())) { items.push(lines[i].trim().replace(/^\d+\.\s+/, "")); i++; }
+      blocks.push(<ol key={key++} className="ml-1 space-y-0.5">{items.map((it, j) => (
+        <li key={j} className="flex gap-1.5"><span className="tabular-nums" style={{ color: "var(--color-text-muted)" }}>{j + 1}.</span><span>{inline(it)}</span></li>
+      ))}</ol>);
+      continue;
+    }
+
+    const para: string[] = [];                                 // paragraph
+    while (i < lines.length && lines[i].trim() && !BLOCK_START.test(lines[i].trim())) { para.push(lines[i].trim()); i++; }
+    blocks.push(<p key={key++}>{inline(para.join(" "))}</p>);
+  }
+  return <div className="space-y-2">{blocks}</div>;
 }
 
 const SUGGESTIONS = [
@@ -88,7 +174,7 @@ export function CopilotApp() {
                 marginRight: m.role === "user" ? 0 : 40,
               }}
             >
-              {m.text}
+              {m.role === "assistant" ? <Markdown text={m.text} /> : m.text}
             </div>
           ))
         )}
