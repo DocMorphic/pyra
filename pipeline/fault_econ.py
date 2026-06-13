@@ -23,8 +23,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-OUT = Path(__file__).parent / "out"
-ART = Path(__file__).parent.parent / "public" / "artifacts"
+import sources as S
+
+OUT = S.OUT
+ART = S.ART
 
 ATTRIB_WINDOW_DAYS = 4   # a loss-day is charged to an onset within this many days before it
 

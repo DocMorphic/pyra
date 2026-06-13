@@ -11,8 +11,10 @@ from pathlib import Path
 
 import pandas as pd
 
-OUT = Path(__file__).parent / "out"
-ART = Path(__file__).parent.parent / "public" / "artifacts"
+import sources as S
+
+OUT = S.OUT
+ART = S.ART
 ART.mkdir(parents=True, exist_ok=True)
 
 

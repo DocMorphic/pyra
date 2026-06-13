@@ -26,8 +26,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-OUT = Path(__file__).parent / "out"
-ART = Path(__file__).parent.parent / "public" / "artifacts"
+import sources as S
+
+OUT = S.OUT
+ART = S.ART
 
 FAULT_WINDOW_DAYS = 4
 OUTAGE_FRAC = 0.25       # daylight loss this severe = an outage (near-total)

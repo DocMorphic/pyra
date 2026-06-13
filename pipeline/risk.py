@@ -29,8 +29,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-OUT = Path(__file__).parent / "out"
-ART = Path(__file__).parent.parent / "public" / "artifacts"
+import sources as S
+
+OUT = S.OUT
+ART = S.ART
 INV_RE = re.compile(r"INV \d{2}\.\d{2}\.\d{3}")
 
 WEIGHTS = {

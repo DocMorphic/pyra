@@ -18,9 +18,9 @@ import pandas as pd
 
 import sources as S
 
-OUT = Path(__file__).parent / "out"
-ART = Path(__file__).parent.parent / "public" / "artifacts"
-OUT.mkdir(exist_ok=True)
+OUT = S.OUT
+ART = S.ART
+OUT.mkdir(parents=True, exist_ok=True)
 ART.mkdir(parents=True, exist_ok=True)
 
 SAMPLE_INTERVAL_H = 5.0 / 60.0  # 5-minute telemetry → hours per sample

@@ -32,8 +32,8 @@ import sources as S
 
 warnings.filterwarnings("ignore")
 
-OUT = Path(__file__).parent / "out"
-ART = Path(__file__).parent.parent / "public" / "artifacts"
+OUT = S.OUT
+ART = S.ART
 
 INTERVAL_H = 5.0 / 60.0
 DAY_IRR = 50.0           # W/m² — daylight floor for loading rows

@@ -18,12 +18,33 @@ DATA_ROOT = Path(
     )
 )
 
-MONITORING_PARQUET = DATA_ROOT / "1. Main-monitoring-data" / "main_monitoring_data.parquet"
-SYSTEM_OVERVIEW = DATA_ROOT / "2. Additional Data" / "System_Overview.xlsx"
-TARIFFS_XLSX = DATA_ROOT / "2. Additional Data" / "feed-in-tarrifs.xlsx"
-TICKETS_XLSX = DATA_ROOT / "2. Additional Data" / "Tickets.xlsx"
-ERRORCODES_PARQUET = DATA_ROOT / "3. Errorcodes" / "errorcodes.parquet"
-ERRORCODES_DESC = DATA_ROOT / "3. Errorcodes" / "errorcodes description (important).xlsx"
+# --- session-aware output/location roots -------------------------------------
+# When PYRA_SESSION is set, the whole pipeline reads/writes under that session
+# (an uploaded dataset normalized by ingest.py); otherwise it uses the default
+# locations so the bundled EnerParc demo is byte-for-byte unchanged.
+_PIPELINE = Path(__file__).parent
+_PROJECT = _PIPELINE.parent
+SESSION = os.environ.get("PYRA_SESSION") or None
+
+if SESSION:
+    OUT = _PIPELINE / "out" / "sessions" / SESSION
+    ART = _PROJECT / "public" / "artifacts" / "sessions" / SESSION
+    # ingest.py writes a canonical monitoring parquet here; downstream SQL reads it.
+    MONITORING_PARQUET = OUT / "canonical_monitoring.parquet"
+    ERRORCODES_PARQUET = OUT / "canonical_errorcodes.parquet"
+    ERRORCODES_DESC = OUT / "errorcode_desc.xlsx"   # may be absent → guarded
+    SYSTEM_OVERVIEW = OUT / "system_overview.xlsx"  # ingest pre-writes metadata instead
+    TARIFFS_XLSX = OUT / "tariffs.xlsx"
+    TICKETS_XLSX = OUT / "tickets.xlsx"
+else:
+    OUT = _PIPELINE / "out"
+    ART = _PROJECT / "public" / "artifacts"
+    MONITORING_PARQUET = DATA_ROOT / "1. Main-monitoring-data" / "main_monitoring_data.parquet"
+    SYSTEM_OVERVIEW = DATA_ROOT / "2. Additional Data" / "System_Overview.xlsx"
+    TARIFFS_XLSX = DATA_ROOT / "2. Additional Data" / "feed-in-tarrifs.xlsx"
+    TICKETS_XLSX = DATA_ROOT / "2. Additional Data" / "Tickets.xlsx"
+    ERRORCODES_PARQUET = DATA_ROOT / "3. Errorcodes" / "errorcodes.parquet"
+    ERRORCODES_DESC = DATA_ROOT / "3. Errorcodes" / "errorcodes description (important).xlsx"
 
 # Timestamps are stored as strings like "2016.12.31 22:00".
 TS_FORMAT = "%Y.%m.%d %H:%M"

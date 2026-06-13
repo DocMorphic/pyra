@@ -36,8 +36,8 @@ import physics
 
 warnings.filterwarnings("ignore")
 
-OUT = Path(__file__).parent / "out"
-ART = Path(__file__).parent.parent / "public" / "artifacts"
+OUT = S.OUT
+ART = S.ART
 
 INTERVAL_H = 5.0 / 60.0
 DAY_IRR = 20.0
