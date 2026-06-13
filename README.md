@@ -42,14 +42,33 @@ python pipeline/soiling.py      # Plant B soiling (optional; needs Plant B csv)
 # 5. Copilot key (optional but recommended)
 cp .env.example .env.local      # then add your ANTHROPIC_API_KEY
 
-# 6. Run
+# 6. Run  (the dev/start scripts put .venv/bin on PATH so the upload
+#          feature can spawn the Python pipeline — keep the venv at .venv)
 npm run dev                     # http://localhost:3000
 ```
 
+## Bring your own dataset (the "living model")
+
+Beyond the bundled EnerParc demo, open **Add Dataset** (Data ▸ Add dataset…) and
+upload any PV monitoring export (CSV / Parquet / XLSX). Pyra:
+1. **auto-detects** column roles (timestamp + cadence, per-inverter P_AC / I_DC /
+   U_DC, irradiance, temps, curtailment) — you confirm/correct the mapping;
+2. runs the **full real pipeline** on it (server spawns the Python scripts),
+   streaming per-step progress live;
+3. **gates each analysis** by what the data supports — windows show "data not
+   available" (e.g. no DC telemetry → no string diagnostics) or "not enough
+   data" (e.g. <3 years → no degradation rate) instead of fabricating numbers.
+
+Switch between the demo and uploaded datasets from the **Data** menu. Requires a
+Node host with Python on PATH (the npm scripts handle this locally); not Vercel
+serverless. Uploaded data + per-session artifacts stay gitignored.
+
 ## Layout
 
-- `pipeline/` — Python: `sources.py` (loaders), `build.py` (tidy tables), `analytics.py` (model + loss ledger), `faults.py` (timeline), `dc_diag.py` (DC/string), `fault_econ.py` (fault €), `risk.py` (risk score), `simulator.py` (what-if), `soiling.py` (Plant B)
+- `pipeline/` — Python: `sources.py` (loaders + session paths), `ingest.py` (normalize any upload → canonical schema + capabilities), `build.py` (tidy tables), `analytics.py` (model + loss ledger), `faults.py` (timeline), `dc_diag.py` (DC/string), `fault_econ.py` (fault €), `risk.py` (risk score), `simulator.py` (what-if), `soiling.py` (Plant B)
 - `app/`, `components/`, `hooks/`, `lib/` — Next.js 16 + Tailwind 4 PyraOS desktop (window manager/dock/boot cloned from the `aliquot` base, rebranded)
-- `components/apps/` — the PyraOS windows (loss ledger, inspector, fault timeline, what-if simulator, fault economics, fleet risk, soiling, copilot, …)
-- `app/api/copilot/` — Anthropic-backed O&M Copilot route
-- `public/artifacts/` — generated JSON (gitignored)
+- `components/apps/` — the PyraOS windows (loss ledger, inspector, fault timeline, what-if simulator, fault economics, fleet risk, soiling, add-dataset, copilot, …)
+- `app/api/copilot/` — Anthropic-backed O&M Copilot route (grounded per active dataset)
+- `app/api/{detect,analyze,dataset}/` — upload detection, SSE pipeline runner, session-artifact serving
+- `lib/pipeline.ts` — server helper that spawns the Python pipeline per session
+- `public/artifacts/` — generated JSON (gitignored); uploads under `pipeline/uploads/` (gitignored)
