@@ -30,6 +30,7 @@ import { SimulatorApp } from "@/components/apps/SimulatorApp";
 import { FaultEconApp } from "@/components/apps/FaultEconApp";
 import { RiskApp } from "@/components/apps/RiskApp";
 import { SoilingApp } from "@/components/apps/SoilingApp";
+import { AddDatasetApp } from "@/components/apps/AddDatasetApp";
 
 const APP_COMPONENTS: Record<string, React.ComponentType> = {
   "plant-map": PlantMapApp,
@@ -40,6 +41,7 @@ const APP_COMPONENTS: Record<string, React.ComponentType> = {
   "fault-econ": FaultEconApp,
   risk: RiskApp,
   soiling: SoilingApp,
+  "add-dataset": AddDatasetApp,
   copilot: CopilotApp,
   methods: MethodsApp,
   report: ExecutiveReportApp,

@@ -65,9 +65,22 @@ export function PyraDataProvider({ children }: { children: React.ReactNode }) {
   const [datasets, setDatasets] = useState<DatasetRef[]>([DEMO]);
   const [activeDataset, setActiveDataset] = useState<DatasetRef>(DEMO);
 
-  // hydrate the saved dataset list + last-active dataset (client only)
+  // hydrate the saved dataset list + last-active dataset (client only).
+  // A ?dataset=<sessionId> URL param opens straight into an uploaded dataset
+  // (shareable link) and wins over the saved active dataset.
   useEffect(() => {
     const list = loadDatasetList();
+    let urlId: string | null = null;
+    try {
+      urlId = new URLSearchParams(window.location.search).get("dataset");
+    } catch {}
+    if (urlId && /^[a-f0-9-]{8,40}$/i.test(urlId)) {
+      const ref = list.find((d) => d.id === urlId)
+        ?? { id: urlId, base: `/api/dataset/${urlId}`, label: "Uploaded dataset" };
+      setDatasets(list.find((d) => d.id === urlId) ? list : [...list, ref]);
+      setActiveDataset(ref);
+      return;
+    }
     setDatasets(list);
     try {
       const activeId = localStorage.getItem(ACTIVE_KEY);

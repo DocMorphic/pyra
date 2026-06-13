@@ -106,6 +106,17 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
     showInExplorer: true,
     showInTaskbar: true,
   },
+  "add-dataset": {
+    id: "add-dataset",
+    title: "Add Dataset",
+    icon: "📤",
+    defaultWidth: 600,
+    defaultHeight: 640,
+    defaultX: 300,
+    defaultY: 70,
+    showInExplorer: true,
+    showInTaskbar: true,
+  },
   copilot: {
     id: "copilot",
     title: "O&M Copilot",

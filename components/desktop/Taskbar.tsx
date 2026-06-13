@@ -13,6 +13,7 @@ const DOCK_APPS_ORDER = [
   "fault-econ",
   "risk",
   "soiling",
+  "add-dataset",
   "copilot",
   "methods",
   "report",

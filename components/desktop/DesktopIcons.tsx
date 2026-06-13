@@ -39,6 +39,7 @@ const DESKTOP_ITEMS: DesktopItem[] = [
   { id: "timeline", label: "faults.log", accent: "#f35454", appId: "timeline", side: "left" },
   { id: "simulator", label: "what-if.sim", accent: "#29dbbb", appId: "simulator", side: "left" },
   { id: "fault-econ", label: "fault-econ.xls", accent: "#b62ad9", appId: "fault-econ", side: "left" },
+  { id: "add-dataset", label: "add-data.up", accent: "#29dbbb", appId: "add-dataset", side: "left" },
   { id: "risk", label: "fleet-risk.app", accent: "#f54e00", appId: "risk", side: "right" },
   { id: "soiling", label: "soiling-B.dat", accent: "#2f80fa", appId: "soiling", side: "right" },
   { id: "methods", label: "methods.md", accent: "#29dbbb", appId: "methods", side: "right" },

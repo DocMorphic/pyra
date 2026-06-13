@@ -5,6 +5,7 @@ import { useWindowManager } from "@/hooks/use-window-manager";
 import { useModal } from "@/hooks/use-modal";
 import { STORAGE_PREFIX } from "@/lib/constants";
 import { useClock } from "@/hooks/use-clock";
+import { usePyraData } from "@/hooks/use-pyra-data";
 import { Sunny } from "@/components/ui/Sunny";
 import { BrightnessPopover } from "./BrightnessPopover";
 
@@ -32,6 +33,7 @@ export function MenuBar() {
   } = useWindowManager();
   const { confirm } = useModal();
   const clock = useClock();
+  const { datasets, activeDataset, switchDataset } = usePyraData();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -57,7 +59,7 @@ export function MenuBar() {
   }, []);
 
   const focusedAppId = getFocusedAppId();
-  const anyMenuOpen = openMenu === "pyra" || openMenu === "plant" || openMenu === "view";
+  const anyMenuOpen = openMenu === "pyra" || openMenu === "plant" || openMenu === "data" || openMenu === "view";
 
   return (
     <div
@@ -193,6 +195,34 @@ export function MenuBar() {
             label="Executive Report"
             onClick={() => {
               openWindow("report");
+              setOpenMenu(null);
+            }}
+          />
+        </MenuButton>
+
+        <MenuButton
+          label="Data"
+          isOpen={openMenu === "data"}
+          onClick={() => setOpenMenu(openMenu === "data" ? null : "data")}
+          onHoverOpen={() => setOpenMenu("data")}
+          anyMenuOpen={anyMenuOpen}
+          className="ml-1"
+        >
+          {datasets.map((d) => (
+            <MenuItem
+              key={d.id}
+              label={`${d.id === activeDataset.id ? "● " : "   "}${d.label}`}
+              onClick={() => {
+                switchDataset(d.id);
+                setOpenMenu(null);
+              }}
+            />
+          ))}
+          <MenuDivider />
+          <MenuItem
+            label="Add dataset…"
+            onClick={() => {
+              openWindow("add-dataset");
               setOpenMenu(null);
             }}
           />
