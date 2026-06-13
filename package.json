@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "PATH=\"$PWD/.venv/bin:$PATH\" next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "PATH=\"$PWD/.venv/bin:$PATH\" next start",
     "lint": "eslint"
   },
   "dependencies": {

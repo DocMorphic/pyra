@@ -10,6 +10,9 @@
 # Generated analytics artifacts — derived from restricted data, regenerated locally
 /public/artifacts/
 
+# Uploaded datasets + their mappings (per-session, restricted user data)
+/pipeline/uploads/
+
 # Node / Next.js
 node_modules/
 .next/

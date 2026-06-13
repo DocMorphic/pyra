@@ -121,27 +121,32 @@ def parse_ts(series: pd.Series, fmt: str | None) -> pd.Series:
 
 # plant-level / aggregate channels that must NOT be grouped as inverters
 _NOT_INVERTER = ["janitza", "meter", "cosphi", "s_ac", "kvar", "q_ac", "i_ac", "combiner", "trafo", "grid"]
+# unit / measurement tokens stripped to find the shared device key
+_UNIT_TOKENS = {"p", "i", "u", "s", "q", "ac", "dc", "pac", "idc", "udc", "power", "current",
+                "voltage", "volt", "volts", "amp", "amps", "sum", "kw", "kwh", "kilowatt",
+                "w", "a", "v", "mw", "kvar", "kva", "wm2"}
 
 
 def measure_of(name: str) -> str | None:
     n = name.lower()
     if any(k in n for k in _NOT_INVERTER):
         return None
-    if any(k in n for k in ["i_dc", "idc"]) or ("current" in n and "dc" in n):
-        return "idc"
-    if any(k in n for k in ["u_dc", "udc"]) or ("voltage" in n and "dc" in n):
+    has_dc = "dc" in n
+    if re.search(r"u[_\s]*dc|dc[_\s]*u|voltage|volt", n) or (has_dc and re.search(r"\(v\)|[_\s]v\b", n)):
         return "udc"
-    if "p_ac" in n or "pac" in n or ("power" in n and "dc" not in n):
-        return "pac"
+    if re.search(r"i[_\s]*dc|dc[_\s]*i|current|\bamp", n) or (has_dc and re.search(r"\(a\)|[_\s]a\b", n)):
+        return "idc"
+    if "p_ac" in n or re.search(r"\bpac\b", n) or "power" in n or \
+            (re.search(r"\bac\b|[_\s]ac[_\s]", n) and re.search(r"kw|kilowatt", n)):
+        return "pac" if not has_dc else None
     return None
 
 
 def device_key(name: str) -> str:
-    n = re.sub(r"\([^)]*\)", "", name)            # drop units like (kW)
-    for tok in ["i_dc_sum", "i_dc", "idc", "u_dc", "udc", "p_ac", "pac",
-                "power", "current", "voltage", "ac", "dc", "sum", "/"]:
-        n = re.sub(tok, " ", n, flags=re.I)
-    return re.sub(r"[\s_\-\.]+", " ", n).strip().lower()
+    n = re.sub(r"\([^)]*\)", "", name).lower()    # drop units like (kW)
+    toks = re.split(r"[\s_\-\./]+", n)
+    keep = [t for t in toks if t and t not in _UNIT_TOKENS]
+    return " ".join(keep)
 
 
 def find_first(cols: list[str], *needles: str) -> str | None:
