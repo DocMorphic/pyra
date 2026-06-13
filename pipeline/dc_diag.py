@@ -178,10 +178,27 @@ def _close(d: pd.DataFrame, run: list[int], k: int | None, eff: float) -> dict |
     }
 
 
+def stub(reason: str) -> None:
+    ART.mkdir(parents=True, exist_ok=True)
+    (ART / "dc_diag.json").write_text(json.dumps({
+        "status": "missing_input", "reason": reason,
+        "perInverter": {}, "totalDcLostKwh": 0,
+        "invertersWithDisconnects": 0, "totalDisconnectEpisodes": 0,
+        "chronicShortfallInverters": 0,
+    }))
+    log(f"skipped: {reason}")
+
+
 def main() -> None:
     S.check_data_present()
+    # No DC telemetry mapped → emit a stub the UI renders as "data missing"
+    # (also avoids an empty-column SQL build below).
+    if S.capability("dc") != "ok":
+        return stub("No DC telemetry (I_DC_SUM + U_DC) in this dataset.")
     log("loading daytime DC frame (I_DC/U_DC/P_AC per inverter)…")
     df, inv_ids = load_dc()
+    if not inv_ids:
+        return stub("No inverter has both I_DC_SUM and U_DC.")
     log(f"{len(df):,} daytime rows · {len(inv_ids)} inverters")
 
     meta = pd.read_parquet(OUT / "inverter_metadata.parquet").set_index("inverterId")

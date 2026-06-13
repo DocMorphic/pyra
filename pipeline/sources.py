@@ -66,6 +66,17 @@ def interval_h(default: float = 5.0 / 60.0) -> float:
     return default
 
 
+def capability(name: str, default: str = "ok") -> str:
+    """Status of an analysis ('ok' | 'missing_input' | 'insufficient_data') from
+    the session capabilities manifest. The demo has no manifest → always 'ok'."""
+    if SESSION:
+        try:
+            return json.loads((ART / "capabilities.json").read_text())["analyses"][name]["status"]
+        except Exception:
+            return default
+    return default
+
+
 def check_data_present() -> None:
     if not MONITORING_PARQUET.exists():
         raise SystemExit(
