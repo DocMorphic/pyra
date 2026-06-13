@@ -47,8 +47,7 @@ export function Desktop() {
   // Open the money headline + plant overview on boot so the demo lands
   // straight on the value.
   useEffect(() => {
-    windowManager.openWindow("loss-ledger");
-    windowManager.openWindow("plant-map");
+    windowManager.openWindow("about");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

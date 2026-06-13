@@ -6,14 +6,16 @@ import { STORAGE_KEYS, DEFAULT_THEME } from "@/lib/constants";
 import { useLocalStorage } from "./use-local-storage";
 
 // PostHog categorical accents.
-export type AccentColor = "orange" | "blue" | "yellow";
+export type AccentColor = "red" | "blue" | "yellow";
 
 interface ThemeContextValue extends ThemeState {
   accent: AccentColor;
+  companion: boolean;
   setMode: (mode: ThemeMode) => void;
   toggleMode: () => void;
   setBrightness: (value: number) => void;
   setAccent: (a: AccentColor) => void;
+  setCompanion: (v: boolean) => void;
 }
 
 export const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -30,7 +32,8 @@ export function useThemeProvider(): ThemeContextValue {
     STORAGE_KEYS.brightness,
     DEFAULT_THEME.brightness
   );
-  const [accent, setAccentRaw] = useLocalStorage<AccentColor>(STORAGE_KEYS.accent, "orange");
+  const [accent, setAccentRaw] = useLocalStorage<AccentColor>(STORAGE_KEYS.accent, "red");
+  const [companion, setCompanionRaw] = useLocalStorage<boolean>("pyra:companion", true);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", mode);
@@ -54,14 +57,17 @@ export function useThemeProvider(): ThemeContextValue {
     [setBrightnessRaw]
   );
   const setAccent = useCallback((a: AccentColor) => setAccentRaw(a), [setAccentRaw]);
+  const setCompanion = useCallback((v: boolean) => setCompanionRaw(v), [setCompanionRaw]);
 
   return {
     mode,
     brightness,
     accent,
+    companion,
     setMode,
     toggleMode,
     setBrightness,
     setAccent,
+    setCompanion,
   };
 }

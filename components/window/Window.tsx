@@ -42,6 +42,7 @@ export function Window({
     closeWindow,
     minimizeWindow,
     maximizeWindow,
+    centerWindow,
     focusWindow,
     updatePosition,
     updateSize,
@@ -243,6 +244,7 @@ export function Window({
         onClose={handleClose}
         onMinimize={handleMinimize}
         onMaximize={handleMaximize}
+        onCenter={() => centerWindow(appId)}
         onPointerDown={handleDragDown}
         onPointerMove={handleDragMove}
         onPointerUp={handleDragUp}
