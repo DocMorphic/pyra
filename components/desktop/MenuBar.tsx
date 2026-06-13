@@ -26,6 +26,8 @@ export function MenuBar() {
     minimizeWindow,
     centerWindow,
     maximizeWindow,
+    focusWindow,
+    restoreWindow,
     getFocusedAppId,
   } = useWindowManager();
   const { confirm } = useModal();
@@ -220,7 +222,11 @@ export function MenuBar() {
         <button
           className="ph-btn red hidden text-[12px] sm:inline-flex"
           style={{ padding: "5px 14px" }}
-          onClick={() => openWindow("report")}
+          onClick={() => {
+            openWindow("report");
+            restoreWindow("report");
+            focusWindow("report");
+          }}
         >
           Live demo
         </button>

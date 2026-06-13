@@ -1,154 +1,143 @@
 "use client";
 
 /**
- * Pixel-art isometric solar farm — Pyra's take on PostHog's pixel scene.
- * Blocky iso cubes (grass/dirt) with ground-mounted PV panels, hedges, and a
- * pixel sun. Hard edges + limited retro palette for the pixel-art feel.
+ * Pixel-art isometric solar farm. A clean rectangular plot of iso cubes with
+ * ground-mounted PV panels and back hedges, grounded by a soft shadow and
+ * faded at the edges so it sits in the desktop rather than floating on it.
  */
-const TW = 56; // tile width
-const TH = 28; // tile height (2:1 iso)
-const CH = 18; // cube height
+const TW = 54;
+const TH = 27;
+const CH = 16;
 
-// palette
-const GRASS_T = "#5a8a3c";
-const GRASS_L = "#3f6a2a";
-const GRASS_R = "#33571f";
-const DIRT_T = "#7a5631";
-const DIRT_L = "#5e4124";
-const DIRT_R = "#4d351d";
-const HEDGE_T = "#3f6e34";
-const HEDGE_L = "#2c4f23";
-const HEDGE_R = "#24411c";
+// muted palette (kept dark so it blends into the charcoal desktop)
+const GRASS_T = "#48703a";
+const GRASS_L = "#33532a";
+const GRASS_R = "#294421";
+const HEDGE_T = "#3a6231";
+const HEDGE_L = "#284621";
+const HEDGE_R = "#1f3a1a";
 const PANEL = "#16263e";
 const PANEL_EDGE = "#0e1828";
-const CELL = "#2f6fae";
-const FRAME = "#aeb4be";
+const CELL_A = "#2f6fae";
+const CELL_B = "#26588c";
+const FRAME = "#8b929c";
 
-function isoPt(c: number, r: number, ox: number, oy: number): [number, number] {
-  return [(c - r) * (TW / 2) + ox, (c + r) * (TH / 2) + oy];
+function isoPt(c: number, r: number): [number, number] {
+  return [(c - r) * (TW / 2), (c + r) * (TH / 2)];
 }
 
-function Cube({ c, r, ox, oy, top, left, right, h = CH }: { c: number; r: number; ox: number; oy: number; top: string; left: string; right: string; h?: number }) {
-  const [x, y] = isoPt(c, r, ox, oy);
+function Cube({ c, r, top, left, right, h = CH }: { c: number; r: number; top: string; left: string; right: string; h?: number }) {
+  const [x, y] = isoPt(c, r);
   return (
     <g shapeRendering="crispEdges">
       <polygon points={`${x},${y - TH / 2} ${x + TW / 2},${y} ${x},${y + TH / 2} ${x - TW / 2},${y}`} fill={top} />
       <polygon points={`${x - TW / 2},${y} ${x},${y + TH / 2} ${x},${y + TH / 2 + h} ${x - TW / 2},${y + h}`} fill={left} />
       <polygon points={`${x + TW / 2},${y} ${x},${y + TH / 2} ${x},${y + TH / 2 + h} ${x + TW / 2},${y + h}`} fill={right} />
-      {/* pixel dithering on the top face */}
-      <rect x={x - 6} y={y - 4} width="3" height="3" fill={left} opacity="0.5" />
-      <rect x={x + 5} y={y + 2} width="3" height="3" fill={left} opacity="0.5" />
+      <rect x={x - 7} y={y - 3} width="3" height="3" fill={left} opacity="0.5" />
+      <rect x={x + 6} y={y + 3} width="3" height="3" fill={left} opacity="0.5" />
     </g>
   );
 }
 
-function PanelOnTile({ c, r, ox, oy }: { c: number; r: number; ox: number; oy: number }) {
-  const [x, yTile] = isoPt(c, r, ox, oy);
-  const y = yTile - 12; // raised on legs
-  const pw = TW - 14;
-  const ph = TH - 7;
-  // legs
-  const legs = (
-    <g shapeRendering="crispEdges">
-      <rect x={x - 2} y={y + ph / 2} width="3" height="12" fill="#2a2a2a" />
-      <rect x={x - pw / 2 + 4} y={y + 2} width="3" height="12" fill="#2a2a2a" />
-      <rect x={x + pw / 2 - 7} y={y + 2} width="3" height="12" fill="#2a2a2a" />
-    </g>
-  );
+function Panel({ c, r }: { c: number; r: number }) {
+  const [x, yTile] = isoPt(c, r);
+  const y = yTile - 11;
+  const pw = TW - 16;
+  const ph = TH - 8;
   const top = `${x},${y - ph / 2}`;
   const right = `${x + pw / 2},${y}`;
   const bottom = `${x},${y + ph / 2}`;
   const left = `${x - pw / 2},${y}`;
-  // pixel cells: 3 columns of cyan cells split by frame lines
   const cells = [];
   for (let i = 0; i < 3; i++) {
     const t0 = i / 3, t1 = (i + 1) / 3;
     const a = [x - pw / 2 + (pw / 2) * t0, y - (ph / 2) * t0];
     const b = [x - pw / 2 + (pw / 2) * t1, y - (ph / 2) * t1];
-    const cC = [b[0] - (pw / 2), b[1] + (ph / 2)];
-    const d = [a[0] - (pw / 2), a[1] + (ph / 2)];
-    cells.push(<polygon key={i} points={`${a} ${b} ${cC} ${d}`} fill={i % 2 ? CELL : "#3a82c4"} />);
+    const cc = [b[0] - pw / 2, b[1] + ph / 2];
+    const d = [a[0] - pw / 2, a[1] + ph / 2];
+    cells.push(<polygon key={i} points={`${a} ${b} ${cc} ${d}`} fill={i % 2 ? CELL_A : CELL_B} />);
   }
   return (
     <g shapeRendering="crispEdges">
-      {legs}
+      <rect x={x - 1.5} y={y + ph / 2} width="3" height="11" fill="#222" />
+      <rect x={x - pw / 2 + 4} y={y + 1} width="3" height="11" fill="#222" />
+      <rect x={x + pw / 2 - 7} y={y + 1} width="3" height="11" fill="#222" />
       <polygon points={`${top} ${right} ${bottom} ${left}`} fill={PANEL} stroke={PANEL_EDGE} strokeWidth="2" />
       {cells}
-      <polygon points={`${top} ${right} ${bottom} ${left}`} fill="none" stroke={FRAME} strokeWidth="1.5" />
-    </g>
-  );
-}
-
-function PixelSun({ x, y }: { x: number; y: number }) {
-  const rays = Array.from({ length: 8 });
-  return (
-    <g shapeRendering="crispEdges">
-      {rays.map((_, i) => {
-        const a = (i * 45 * Math.PI) / 180;
-        return <rect key={i} x={x + Math.cos(a) * 26 - 2} y={y + Math.sin(a) * 26 - 2} width="5" height="5" fill="#f7a501" />;
-      })}
-      <rect x={x - 14} y={y - 14} width="28" height="28" fill="#f7a501" />
-      <rect x={x - 18} y={y - 10} width="36" height="20" fill="#f7a501" />
-      <rect x={x - 10} y={y - 18} width="20" height="36" fill="#f7a501" />
-      <rect x={x - 8} y={y - 8} width="16" height="16" fill="#ffd699" />
+      <polygon points={`${top} ${right} ${bottom} ${left}`} fill="none" stroke={FRAME} strokeWidth="1.3" />
     </g>
   );
 }
 
 export function SolarFarmScene() {
-  // farm plot: 5x4 grass, panels on inner tiles, hedges on the back row
-  const ox = 0, oy = 0;
-  const grass: [number, number][] = [];
-  for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) grass.push([c, r]);
+  const COLS = 5, ROWS = 4;
+  const ground: [number, number][] = [];
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) ground.push([c, r]);
+
+  // one panel centered on every non-hedge grass tile → tidy, no overhang
   const panels: [number, number][] = [];
-  for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) panels.push([c + 0.5, r + 0.5]);
+  for (let r = 1; r < ROWS; r++) for (let c = 0; c < COLS; c++) panels.push([c, r]);
 
   return (
     <svg
       className="pointer-events-none absolute"
-      style={{ right: "1%", bottom: "3%", width: 620, height: 480, opacity: 0.97, imageRendering: "pixelated" }}
-      viewBox="-220 -120 460 380"
+      style={{ right: "2%", bottom: "5%", width: 640, height: 520, opacity: 0.95, imageRendering: "pixelated" }}
+      viewBox="-200 -150 400 360"
       aria-hidden
     >
       <defs>
-        <radialGradient id="farm-glow2" cx="22%" cy="8%" r="70%">
-          <stop offset="0%" stopColor="#f7a501" stopOpacity="0.16" />
-          <stop offset="60%" stopColor="#f54e00" stopOpacity="0.04" />
+        <radialGradient id="farm-glow2" cx="20%" cy="6%" r="75%">
+          <stop offset="0%" stopColor="#f7a501" stopOpacity="0.13" />
+          <stop offset="55%" stopColor="#f54e00" stopOpacity="0.03" />
           <stop offset="100%" stopColor="#f54e00" stopOpacity="0" />
         </radialGradient>
+        {/* fade the scene edges so the slab doesn't read as a pasted rectangle */}
+        <radialGradient id="farm-fade" cx="50%" cy="50%" r="62%">
+          <stop offset="0%" stopColor="#fff" stopOpacity="1" />
+          <stop offset="78%" stopColor="#fff" stopOpacity="1" />
+          <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+        </radialGradient>
+        <mask id="farm-mask">
+          <rect x="-200" y="-150" width="400" height="360" fill="url(#farm-fade)" />
+        </mask>
+        <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="9" />
+        </filter>
       </defs>
-      <rect x="-220" y="-120" width="460" height="380" fill="url(#farm-glow2)" />
-      <PixelSun x={-150} y={-70} />
 
-      {/* ground cubes (painter's order: back to front by c+r) */}
-      {grass
-        .slice()
-        .sort((a, b) => a[0] + a[1] - (b[0] + b[1]))
-        .map(([c, r], i) => {
-          const isHedge = r === 0; // back row = hedges
-          const isPath = c === 2 && r > 0; // a dirt path down the middle
-          return (
-            <Cube
-              key={`g${i}`}
-              c={c}
-              r={r}
-              ox={ox}
-              oy={oy}
-              h={isHedge ? CH + 16 : CH}
-              top={isHedge ? HEDGE_T : isPath ? DIRT_T : GRASS_T}
-              left={isHedge ? HEDGE_L : isPath ? DIRT_L : GRASS_L}
-              right={isHedge ? HEDGE_R : isPath ? DIRT_R : GRASS_R}
-            />
-          );
-        })}
+      <rect x="-200" y="-150" width="400" height="360" fill="url(#farm-glow2)" />
 
-      {/* panels on top, also back-to-front */}
-      {panels
-        .slice()
-        .sort((a, b) => a[0] + a[1] - (b[0] + b[1]))
-        .map(([c, r], i) =>
-          c === 2.5 ? null : <PanelOnTile key={`p${i}`} c={c} r={r} ox={ox} oy={oy} />
-        )}
+      <g mask="url(#farm-mask)">
+        {/* grounding shadow under the slab */}
+        <ellipse cx="0" cy="120" rx="155" ry="46" fill="#000" opacity="0.4" filter="url(#soft)" />
+
+        {/* ground (back-to-front) */}
+        {ground
+          .slice()
+          .sort((a, b) => a[0] + a[1] - (b[0] + b[1]))
+          .map(([c, r], i) => {
+            const hedge = r === 0;
+            return (
+              <Cube
+                key={`g${i}`}
+                c={c}
+                r={r}
+                h={hedge ? CH + 14 : CH}
+                top={hedge ? HEDGE_T : GRASS_T}
+                left={hedge ? HEDGE_L : GRASS_L}
+                right={hedge ? HEDGE_R : GRASS_R}
+              />
+            );
+          })}
+
+        {/* panels (back-to-front) */}
+        {panels
+          .slice()
+          .sort((a, b) => a[0] + a[1] - (b[0] + b[1]))
+          .map(([c, r], i) => (
+            <Panel key={`p${i}`} c={c} r={r} />
+          ))}
+      </g>
     </svg>
   );
 }
