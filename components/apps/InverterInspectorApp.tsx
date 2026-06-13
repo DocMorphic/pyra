@@ -6,7 +6,7 @@ import { usePyraData } from "@/hooks/use-pyra-data";
 import { CAUSE_LABEL, CAUSE_COLOR, eur, kwh, healthColor, riskColor } from "@/lib/artifacts";
 
 export function InverterInspectorApp() {
-  const { data, loading, error, selectedInverter, setSelectedInverter } = usePyraData();
+  const { data, loading, error, selectedInverter, setSelectedInverter, capabilityOf } = usePyraData();
 
   if (loading) return <EmptyState showCmd={false} title="Herding photons…" />;
   if (error || !data) return <EmptyState title="No analytics yet" hint="Run the pipeline first." />;
@@ -137,6 +137,12 @@ export function InverterInspectorApp() {
       </div>
 
       {/* DC / string diagnostics — from per-inverter I_DC_SUM / U_DC */}
+      {!dc && capabilityOf("dc").status !== "ok" && (
+        <div className="mt-5 rounded-md px-3 py-2.5 text-[11.5px]"
+          style={{ background: "var(--color-info-box)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)" }}>
+          DC / string diagnostics unavailable — {capabilityOf("dc").reason || "no I_DC / U_DC telemetry in this dataset."}
+        </div>
+      )}
       {dc && (
         <div className="mt-5">
           <SectionCard title="DC / string health" color="#29dbbb"

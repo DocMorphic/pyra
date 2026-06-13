@@ -257,14 +257,20 @@ def write_app_artifacts(con, meta: pd.DataFrame, daily: pd.DataFrame, inv_ids: l
             "lifetimeKwh": round(float(lifetime.get(r["inverterId"], 0.0)), 1),
         })
 
+    plant_name = "Plant A"
+    if S.SESSION:
+        try:
+            plant_name = json.loads((ART / "capabilities.json").read_text()).get("label") or "Uploaded dataset"
+        except Exception:
+            plant_name = "Uploaded dataset"
     meta_json = {
-        "plant": "Plant A",
+        "plant": plant_name,
         "inverterCount": len(inverters),
         "totalKwp": round(float(meta["kWp"].sum()), 1),
         "moduleTypes": int(meta["moduleType"].nunique()),
         "dateStart": str(span[0]),
         "dateEnd": str(span[1]),
-        "generatedFrom": "main_monitoring_data.parquet (restricted)",
+        "generatedFrom": "uploaded dataset" if S.SESSION else "main_monitoring_data.parquet (restricted)",
     }
     (ART / "meta.json").write_text(json.dumps(meta_json, indent=2))
     (ART / "inverters.json").write_text(json.dumps(inverters, indent=2))

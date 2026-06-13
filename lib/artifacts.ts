@@ -235,6 +235,22 @@ export interface Soiling {
   series: { t: string; v: number }[];
 }
 
+export type CapStatus = "ok" | "missing_input" | "insufficient_data";
+export interface AnalysisCap {
+  status: CapStatus;
+  reason: string;
+  requires?: string[];
+}
+export interface Capabilities {
+  label: string;
+  intervalH: number;
+  intervalLabel: string;
+  spanDays: number;
+  nInverters: number;
+  kwpSource: string;
+  analyses: Record<string, AnalysisCap>;
+}
+
 export interface ArtifactBundle {
   meta: PlantMeta;
   inverters: InverterInfo[];
@@ -245,46 +261,71 @@ export interface ArtifactBundle {
   tickets: TicketEntry[];
   metrics: ModelMetrics;
   moduleTypes: Record<string, ModuleTypeAgg>;
-  dc: DcDiag;
-  faultEcon: FaultEcon;
-  risk: RiskData;
-  simulator: Simulator;
-  soiling: Soiling;
+  // Optional for uploaded datasets that lack the inputs (null = unavailable).
+  dc: DcDiag | null;
+  faultEcon: FaultEcon | null;
+  risk: RiskData | null;
+  simulator: Simulator | null;
+  soiling: Soiling | null;
+  capabilities: Capabilities | null;
 }
 
-const BASE = "/artifacts";
+export const DEMO_BASE = "/artifacts";
 
-export async function loadArtifacts(): Promise<ArtifactBundle> {
-  const [
-    meta, inverters, ledger, performance, causes, faults, tickets, metrics, degradation,
-    dc, faultEcon, risk, simulator, soiling,
-  ] = await Promise.all([
-    fetchJson<PlantMeta>("meta.json"),
-    fetchJson<InverterInfo[]>("inverters.json"),
-    fetchJson<LedgerEntry[]>("loss_ledger.json"),
-    fetchJson<Record<string, Performance>>("performance.json"),
-    fetchJson<Record<string, Cause>>("causes.json"),
-    fetchJson<Record<string, FaultSummary>>("faults.json"),
-    fetchJson<TicketEntry[]>("tickets.json"),
-    fetchJson<ModelMetrics>("model_metrics.json"),
-    fetchJson<{ byModuleType: Record<string, ModuleTypeAgg> }>("degradation.json"),
-    fetchJson<DcDiag>("dc_diag.json"),
-    fetchJson<FaultEcon>("fault_econ.json"),
-    fetchJson<RiskData>("risk.json"),
-    fetchJson<Simulator>("simulator.json"),
-    fetchJson<Soiling>("soiling.json"),
-  ]);
+/**
+ * Load a dataset's artifacts. `base` is "/artifacts" for the bundled demo, or
+ * "/api/dataset/<sessionId>" for an uploaded dataset (served via the dataset
+ * route, since Next won't statically serve runtime-created public files).
+ * Core artifacts are required; the rest are optional → null when an analysis
+ * wasn't applicable to the uploaded data.
+ */
+export async function loadArtifacts(base: string = DEMO_BASE): Promise<ArtifactBundle> {
+  const req = <T>(n: string) => fetchJson<T>(n, base);
+  const opt = <T>(n: string) => fetchJsonOpt<T>(n, base);
+  const [meta, inverters, ledger, performance, causes, metrics, degradation] =
+    await Promise.all([
+      req<PlantMeta>("meta.json"),
+      req<InverterInfo[]>("inverters.json"),
+      req<LedgerEntry[]>("loss_ledger.json"),
+      req<Record<string, Performance>>("performance.json"),
+      req<Record<string, Cause>>("causes.json"),
+      req<ModelMetrics>("model_metrics.json"),
+      req<{ byModuleType: Record<string, ModuleTypeAgg> }>("degradation.json"),
+    ]);
+  const [faults, tickets, dc, faultEcon, risk, simulator, soiling, capabilities] =
+    await Promise.all([
+      opt<Record<string, FaultSummary>>("faults.json"),
+      opt<TicketEntry[]>("tickets.json"),
+      opt<DcDiag>("dc_diag.json"),
+      opt<FaultEcon>("fault_econ.json"),
+      opt<RiskData>("risk.json"),
+      opt<Simulator>("simulator.json"),
+      opt<Soiling>("soiling.json"),
+      opt<Capabilities>("capabilities.json"),
+    ]);
   return {
-    meta, inverters, ledger, performance, causes, faults, tickets,
+    meta, inverters, ledger, performance, causes,
+    faults: faults ?? {}, tickets: tickets ?? [],
     metrics, moduleTypes: degradation.byModuleType,
-    dc, faultEcon, risk, simulator, soiling,
+    dc: dc && (dc as { status?: string }).status === "missing_input" ? null : dc,
+    faultEcon, risk, simulator, soiling, capabilities,
   };
 }
 
-async function fetchJson<T>(name: string): Promise<T> {
-  const res = await fetch(`${BASE}/${name}`, { cache: "no-store" });
+async function fetchJson<T>(name: string, base: string): Promise<T> {
+  const res = await fetch(`${base}/${name}`, { cache: "no-store" });
   if (!res.ok) throw new Error(`Failed to load ${name} (${res.status})`);
   return res.json() as Promise<T>;
+}
+
+async function fetchJsonOpt<T>(name: string, base: string): Promise<T | null> {
+  try {
+    const res = await fetch(`${base}/${name}`, { cache: "no-store" });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
 }
 
 export const CAUSE_LABEL: Record<Cause, string> = {

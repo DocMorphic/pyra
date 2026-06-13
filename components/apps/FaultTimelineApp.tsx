@@ -1,12 +1,14 @@
 "use client";
 
-import { AppHeader, EmptyState } from "./_shared";
+import { AppHeader, EmptyState, GatedEmpty } from "./_shared";
 import { usePyraData } from "@/hooks/use-pyra-data";
 
 export function FaultTimelineApp() {
-  const { data, loading, error, selectedInverter, setSelectedInverter } = usePyraData();
+  const { data, loading, error, selectedInverter, setSelectedInverter, capabilityOf } = usePyraData();
 
   if (loading) return <EmptyState showCmd={false} title="Herding photons…" />;
+  const cap = capabilityOf("faults");
+  if (cap.status !== "ok") return <GatedEmpty cap={cap} />;
   if (error || !data) return <EmptyState title="No analytics yet" hint="Run the pipeline first." />;
 
   const id = selectedInverter ?? data.ledger[0]?.inverterId;

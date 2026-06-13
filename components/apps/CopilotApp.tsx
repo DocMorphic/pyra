@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { AppHeader } from "./_shared";
+import { usePyraData } from "@/hooks/use-pyra-data";
 
 interface Msg {
   role: "user" | "assistant";
@@ -15,6 +16,7 @@ const SUGGESTIONS = [
 ];
 
 export function CopilotApp() {
+  const { activeDataset } = usePyraData();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -33,7 +35,7 @@ export function CopilotApp() {
       const res = await fetch("/api/copilot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next }),
+        body: JSON.stringify({ messages: next, datasetId: activeDataset.id === "demo" ? undefined : activeDataset.id }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);

@@ -1,13 +1,15 @@
 "use client";
 
-import { AppHeader, Stat, EmptyState, SectionCard } from "./_shared";
+import { AppHeader, Stat, EmptyState, SectionCard, GatedEmpty } from "./_shared";
 import { usePyraData } from "@/hooks/use-pyra-data";
 import { eur, FAULT_CAT_COLOR } from "@/lib/artifacts";
 
 export function FaultEconApp() {
-  const { data, loading, error } = usePyraData();
+  const { data, loading, error, capabilityOf } = usePyraData();
 
   if (loading) return <EmptyState showCmd={false} title="Costing the faults…" />;
+  const cap = capabilityOf("fault_econ");
+  if (cap.status !== "ok") return <GatedEmpty cap={cap} />;
   if (error || !data?.faultEcon) return <EmptyState title="No fault economics" hint="Run python pipeline/fault_econ.py" />;
 
   const fe = data.faultEcon;

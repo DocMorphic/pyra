@@ -21,30 +21,44 @@ interface ArtifactCtx {
   text: string;
   builtAt: number;
 }
-let cached: ArtifactCtx | null = null;
+const cache = new Map<string, ArtifactCtx>();
+const SESSION_RE = /^[a-f0-9-]{8,40}$/i;
 
-async function buildContext(): Promise<string> {
+async function buildContext(datasetId?: string): Promise<string> {
+  const key = datasetId || "demo";
+  const hit = cache.get(key);
   // Re-read at most once a minute; the artifact JSON is byte-stable between
   // pipeline runs, so the cached system prefix keeps hitting the prompt cache.
-  if (cached && Date.now() - cached.builtAt < 60_000) return cached.text;
+  if (hit && Date.now() - hit.builtAt < 60_000) return hit.text;
 
-  const dir = path.join(process.cwd(), "public", "artifacts");
+  const dir = datasetId
+    ? path.join(process.cwd(), "public", "artifacts", "sessions", datasetId)
+    : path.join(process.cwd(), "public", "artifacts");
   const read = async (f: string) =>
     JSON.parse(await readFile(path.join(dir, f), "utf8"));
+  const readOpt = async (f: string) => {
+    try {
+      const v = JSON.parse(await readFile(path.join(dir, f), "utf8"));
+      return v && v.status === "missing_input" ? null : v;
+    } catch {
+      return null;
+    }
+  };
 
-  const [meta, ledger, causes, metrics, degradation, dc, faultEcon, risk, simulator, soiling] =
-    await Promise.all([
-      read("meta.json"),
-      read("loss_ledger.json"),
-      read("causes.json"),
-      read("model_metrics.json"),
-      read("degradation.json"),
-      read("dc_diag.json"),
-      read("fault_econ.json"),
-      read("risk.json"),
-      read("simulator.json"),
-      read("soiling.json"),
-    ]);
+  const [meta, ledger, causes, metrics, degradation] = await Promise.all([
+    read("meta.json"),
+    read("loss_ledger.json"),
+    read("causes.json"),
+    read("model_metrics.json"),
+    read("degradation.json"),
+  ]);
+  const [dc, faultEcon, risk, simulator, soiling] = await Promise.all([
+    readOpt("dc_diag.json"),
+    readOpt("fault_econ.json"),
+    readOpt("risk.json"),
+    readOpt("simulator.json"),
+    readOpt("soiling.json"),
+  ]);
 
   const rows = ledger
     .map(
@@ -67,32 +81,45 @@ async function buildContext(): Promise<string> {
   const recon = metrics.reconciliation;
   const loc = metrics.location;
 
-  // --- Phase 7 deep-analytics context blocks ---
-  const faultRows = (faultEcon.categories || [])
+  // --- deep-analytics context blocks (each section only when its data exists) ---
+  const faultSection = faultEcon ? `
+## Fault economics (validated loss attributed to error-code categories)
+${(faultEcon.categories || [])
     .filter((c: Record<string, unknown>) => c.category !== "unattributed")
     .map((c: Record<string, unknown>) =>
       `- ${c.label}: ${c.events} onsets on ${c.invertersAffected} inverters → €${Math.round(Number(c.lostEur))} lost`)
-    .join("\n");
+    .join("\n")}
+Total fault-attributed: €${Math.round(faultEcon.totalAttributedEur)} of €${Math.round(faultEcon.totalLossEur)} (${Math.round(faultEcon.attributedFraction * 100)}%); the rest is gradual degradation/soiling. ${faultEcon.totalOnsets} fault onsets total.` : "";
 
-  const riskRows = (risk.ranked || []).slice(0, 12)
-    .map((id: string, i: number) => {
-      const r = risk.perInverter[id] as Record<string, unknown>;
-      const drv = ((r.drivers as { label: string }[]) || []).map((d) => d.label).join(", ");
-      return `${i + 1}. ${id}: risk ${r.risk}/100, health ${Math.round(Number(r.health) * 100)}%, ${r.recentErrors12mo} errors/12mo, ${r.tickets} tickets [${drv}]`;
-    })
-    .join("\n");
-
-  const tl = risk.ticketLink || {};
-  const simByCause = simulator.fleetByCause || {};
-  const dcTop = Object.entries(dc.perInverter || {})
+  const dcSection = dc ? `
+## DC / string diagnostics (from per-inverter I_DC_SUM + U_DC)
+${dc.totalDisconnectEpisodes} discrete DC-disconnect events (current→0, voltage healthy) across ${dc.invertersWithDisconnects} inverters; ${Math.round(dc.totalDcLostKwh)} kWh lost. Worst:
+${Object.entries(dc.perInverter || {})
     .filter(([, v]) => (v as Record<string, unknown>).dcLostKwh as number > 0)
-    .sort((a, b) => (Number((b[1] as Record<string, unknown>).dcLostKwh)) - (Number((a[1] as Record<string, unknown>).dcLostKwh)))
+    .sort((a, b) => Number((b[1] as Record<string, unknown>).dcLostKwh) - Number((a[1] as Record<string, unknown>).dcLostKwh))
     .slice(0, 6)
     .map(([id, v]) => {
       const x = v as Record<string, unknown>;
       return `- ${id}: ${(x.episodes as unknown[]).length} disconnect event(s), ${Math.round(Number(x.dcLostKwh))} kWh lost, DC→AC eff ${(Number(x.meanEff) * 100).toFixed(1)}%`;
     })
-    .join("\n");
+    .join("\n")}` : "";
+
+  const riskSection = risk ? `
+## Failure-risk / service priority (as of ${risk.asOf}; score 0–100)
+${(risk.ranked || []).slice(0, 12).map((id: string, i: number) => {
+    const r = risk.perInverter[id] as Record<string, unknown>;
+    const drv = ((r.drivers as { label: string }[]) || []).map((d) => d.label).join(", ");
+    return `${i + 1}. ${id}: risk ${r.risk}/100, health ${Math.round(Number(r.health) * 100)}%, ${r.recentErrors12mo} errors/12mo, ${r.tickets} tickets [${drv}]`;
+  }).join("\n")}
+Ticket validation: ${risk.ticketLink?.withPrecedingErrors}/${risk.ticketLink?.linkedTickets} inverter-named tickets were preceded by our error onsets (median lead ${risk.ticketLink?.medianLeadDays} days).` : "";
+
+  const simSection = simulator ? `
+## What-if recoverable loss (mutually-exclusive buckets, sum to the ledger)
+DC €${Math.round(simulator.fleetByCause?.dc?.eur ?? 0)} · Outage €${Math.round(simulator.fleetByCause?.outage?.eur ?? 0)} · Fault €${Math.round(simulator.fleetByCause?.fault?.eur ?? 0)} · Degradation €${Math.round(simulator.fleetByCause?.degradation?.eur ?? 0)}. Operationally recoverable (DC+outage+fault): €${Math.round(simulator.fleetRecoverableEur)} of €${Math.round(simulator.fleetTotalLossEur)} total.` : "";
+
+  const soilingSection = soiling ? `
+## Plant B soiling (${soiling.coords.lat}°N, ${soiling.coords.lon}°E; ${soiling.kWp} kWp)
+Soiling rate ≈ ${soiling.soilingRatePctPerDay}%/day; mean soiling loss ${soiling.totalSoilingLossPct}% → ~${Math.round(soiling.annualSoilingLossKwh)} kWh/yr (€${Math.round(soiling.annualSoilingLossEur)}). ${soiling.episodes.length} episodes, spring/summer (pollen), rain-reset.` : "";
 
   const text = `# PLANT DATA — ${meta.plant}
 Inverters: ${meta.inverterCount} · Capacity: ${meta.totalKwp} kWp · Module types: ${meta.moduleTypes}
@@ -112,25 +139,11 @@ ${rows}
 
 ## Degradation by module type
 ${mtRows}
-
-## Fault economics (validated loss attributed to error-code categories)
-${faultRows}
-Total fault-attributed: €${Math.round(faultEcon.totalAttributedEur)} of €${Math.round(faultEcon.totalLossEur)} (${Math.round(faultEcon.attributedFraction * 100)}%); the rest is gradual degradation/soiling. ${faultEcon.totalOnsets} fault onsets total.
-
-## DC / string diagnostics (from per-inverter I_DC_SUM + U_DC)
-${dc.totalDisconnectEpisodes} discrete DC-disconnect events (current→0, voltage healthy) across ${dc.invertersWithDisconnects} inverters; ${Math.round(dc.totalDcLostKwh)} kWh lost. Worst:
-${dcTop}
-
-## Failure-risk / service priority (as of ${risk.asOf}; score 0–100)
-${riskRows}
-Ticket validation: ${tl.withPrecedingErrors}/${tl.linkedTickets} inverter-named O&M tickets were preceded by our error onsets (median lead ${tl.medianLeadDays} days) — the twin predicts failures before maintenance is logged.
-
-## What-if recoverable loss (mutually-exclusive buckets, sum to the ledger)
-DC €${Math.round(simByCause.dc?.eur ?? 0)} · Outage €${Math.round(simByCause.outage?.eur ?? 0)} · Fault €${Math.round(simByCause.fault?.eur ?? 0)} · Degradation €${Math.round(simByCause.degradation?.eur ?? 0)}.
-Operationally recoverable (DC+outage+fault): €${Math.round(simulator.fleetRecoverableEur)} of €${Math.round(simulator.fleetTotalLossEur)} total.
-
-## Plant B soiling (${soiling.coords.lat}°N, ${soiling.coords.lon}°E; ${soiling.kWp} kWp)
-Soiling rate ≈ ${soiling.soilingRatePctPerDay}%/day; mean soiling loss ${soiling.totalSoilingLossPct}% → ~${Math.round(soiling.annualSoilingLossKwh)} kWh/yr (€${Math.round(soiling.annualSoilingLossEur)}). ${soiling.episodes.length} episodes, clustering in spring/summer (pollen), rain-reset. Detected via pvlib clear-sky temperature-corrected PR.
+${faultSection}
+${dcSection}
+${riskSection}
+${simSection}
+${soilingSection}
 
 ## Cause definitions
 - degradation: gradual yield decline vs the year-1 baseline (permanent)
@@ -141,7 +154,7 @@ Soiling rate ≈ ${soiling.soilingRatePctPerDay}%/day; mean soiling loss ${soili
 
 Loss = (expected − actual) energy over daylight, NON-curtailed intervals (EVU/DV excluded), valued at the per-week feed-in tariff, with a 95% confidence interval. The expected-power model is trained per inverter on its first operating year and cross-checked with pvlib physics.`;
 
-  cached = { text, builtAt: Date.now() };
+  cache.set(key, { text, builtAt: Date.now() });
   return text;
 }
 
@@ -153,7 +166,7 @@ export async function POST(req: Request) {
     );
   }
 
-  let body: { messages?: { role: "user" | "assistant"; text: string }[] };
+  let body: { messages?: { role: "user" | "assistant"; text: string }[]; datasetId?: string };
   try {
     body = await req.json();
   } catch {
@@ -163,8 +176,15 @@ export async function POST(req: Request) {
   if (history.length === 0) {
     return NextResponse.json({ error: "No message provided" }, { status: 400 });
   }
+  // Per-dataset grounding (uploaded session vs the demo).
+  const datasetId = body.datasetId && SESSION_RE.test(body.datasetId) ? body.datasetId : undefined;
 
-  const dataContext = await buildContext();
+  let dataContext: string;
+  try {
+    dataContext = await buildContext(datasetId);
+  } catch {
+    return NextResponse.json({ error: "Analytics for this dataset aren't ready yet." }, { status: 503 });
+  }
   const client = new Anthropic();
 
   try {

@@ -1,14 +1,16 @@
 "use client";
 
-import { AppHeader, Stat, EmptyState, SectionCard } from "./_shared";
+import { AppHeader, Stat, EmptyState, SectionCard, GatedEmpty } from "./_shared";
 import { UplotChart } from "./_uplot";
 import { usePyraData } from "@/hooks/use-pyra-data";
 import { eur, kwh } from "@/lib/artifacts";
 
 export function SoilingApp() {
-  const { data, loading, error } = usePyraData();
+  const { data, loading, error, capabilityOf } = usePyraData();
 
   if (loading) return <EmptyState showCmd={false} title="Watching the dust settle…" />;
+  const cap = capabilityOf("soiling");
+  if (cap.status !== "ok") return <GatedEmpty cap={cap} />;
   if (error || !data?.soiling) return <EmptyState title="No soiling data" hint="Run python pipeline/soiling.py" />;
 
   const s = data.soiling;

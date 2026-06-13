@@ -1,13 +1,15 @@
 "use client";
 
-import { AppHeader, Stat, EmptyState, SectionCard } from "./_shared";
+import { AppHeader, Stat, EmptyState, SectionCard, GatedEmpty } from "./_shared";
 import { usePyraData } from "@/hooks/use-pyra-data";
 import { riskColor } from "@/lib/artifacts";
 
 export function RiskApp() {
-  const { data, loading, error, selectInverter, selectedInverter } = usePyraData();
+  const { data, loading, error, selectInverter, selectedInverter, capabilityOf } = usePyraData();
 
   if (loading) return <EmptyState showCmd={false} title="Scoring the fleet…" />;
+  const cap = capabilityOf("risk");
+  if (cap.status !== "ok") return <GatedEmpty cap={cap} />;
   if (error || !data?.risk) return <EmptyState title="No risk data" hint="Run python pipeline/risk.py" />;
 
   const risk = data.risk;

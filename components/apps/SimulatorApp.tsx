@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AppHeader, Stat, EmptyState, SectionCard } from "./_shared";
+import { AppHeader, Stat, EmptyState, SectionCard, GatedEmpty } from "./_shared";
 import { UplotChart } from "./_uplot";
 import { usePyraData } from "@/hooks/use-pyra-data";
 import { eur, kwh, SIM_CAUSE_COLOR, SIM_CAUSE_LABEL, type SimInverter } from "@/lib/artifacts";
@@ -10,7 +10,7 @@ type CauseKey = "dc" | "outage" | "fault" | "degradation";
 const CAUSES: CauseKey[] = ["dc", "outage", "fault", "degradation"];
 
 export function SimulatorApp() {
-  const { data, loading, error, selectInverter } = usePyraData();
+  const { data, loading, error, selectInverter, capabilityOf } = usePyraData();
   const [active, setActive] = useState<Record<CauseKey, boolean>>({
     dc: true, outage: true, fault: true, degradation: false,
   });
@@ -68,6 +68,8 @@ export function SimulatorApp() {
   }, [sim, entries, chosen, horizon, active.degradation]);
 
   if (loading) return <EmptyState showCmd={false} title="Spinning up the twin…" />;
+  const cap = capabilityOf("simulator");
+  if (cap.status !== "ok") return <GatedEmpty cap={cap} />;
   if (error || !sim) return <EmptyState title="No simulator data" hint="Run python pipeline/simulator.py" />;
 
   const fleetRecoverable = sim.fleetRecoverableEur;

@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Sunny } from "@/components/ui/Sunny";
+import type { AnalysisCap } from "@/lib/artifacts";
 
 /** Section heading used across Pyra app windows. */
 export function AppHeader({
@@ -91,6 +92,19 @@ export function EmptyState({
         </code>
       )}
     </div>
+  );
+}
+
+/** Empty state driven by a capability — "data missing" vs "not enough data". */
+export function GatedEmpty({ cap }: { cap: AnalysisCap }) {
+  const insufficient = cap.status === "insufficient_data";
+  return (
+    <EmptyState
+      showCmd={false}
+      mood="worried"
+      title={insufficient ? "Not enough data" : "Data not available"}
+      hint={cap.reason || "This analysis isn't available for the active dataset."}
+    />
   );
 }
 
