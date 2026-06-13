@@ -147,6 +147,35 @@ export function MenuBar() {
           />
           <MenuDivider />
           <MenuItem
+            label="What-if Simulator"
+            onClick={() => {
+              openWindow("simulator");
+              setOpenMenu(null);
+            }}
+          />
+          <MenuItem
+            label="Fault Economics"
+            onClick={() => {
+              openWindow("fault-econ");
+              setOpenMenu(null);
+            }}
+          />
+          <MenuItem
+            label="Fleet Risk"
+            onClick={() => {
+              openWindow("risk");
+              setOpenMenu(null);
+            }}
+          />
+          <MenuItem
+            label="Soiling · Plant B"
+            onClick={() => {
+              openWindow("soiling");
+              setOpenMenu(null);
+            }}
+          />
+          <MenuDivider />
+          <MenuItem
             label="O&M Copilot"
             onClick={() => {
               openWindow("copilot");

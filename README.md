@@ -29,10 +29,15 @@ pip install pandas pyarrow duckdb openpyxl numpy scikit-learn pvlib scipy
 # 3. Point at the local dataset (defaults to the hackathon Downloads path)
 export PYRA_DATA="/path/to/EP-Challenge-Final/Plant A (start here)"
 
-# 4. Generate artifacts → public/artifacts/*.json
+# 4. Generate artifacts → public/artifacts/*.json  (run in this order)
 python pipeline/build.py        # tidy tables + meta/inverters
-python pipeline/analytics.py    # expected-power model, loss ledger, degradation
+python pipeline/analytics.py    # expected-power model, loss ledger, degradation, daily_expected
 python pipeline/faults.py       # fault timeline + tickets
+python pipeline/dc_diag.py      # I_DC/U_DC string + disconnect diagnostics
+python pipeline/fault_econ.py   # € per error-code category
+python pipeline/risk.py         # failure-risk score + ticket links
+python pipeline/simulator.py    # what-if recoverable-loss precompute
+python pipeline/soiling.py      # Plant B soiling (optional; needs Plant B csv)
 
 # 5. Copilot key (optional but recommended)
 cp .env.example .env.local      # then add your ANTHROPIC_API_KEY
@@ -43,8 +48,8 @@ npm run dev                     # http://localhost:3000
 
 ## Layout
 
-- `pipeline/` — Python: `sources.py` (loaders), `build.py` (tidy tables), `analytics.py` (model + loss ledger), `faults.py` (timeline)
+- `pipeline/` — Python: `sources.py` (loaders), `build.py` (tidy tables), `analytics.py` (model + loss ledger), `faults.py` (timeline), `dc_diag.py` (DC/string), `fault_econ.py` (fault €), `risk.py` (risk score), `simulator.py` (what-if), `soiling.py` (Plant B)
 - `app/`, `components/`, `hooks/`, `lib/` — Next.js 16 + Tailwind 4 PyraOS desktop (window manager/dock/boot cloned from the `aliquot` base, rebranded)
-- `components/apps/` — the six PyraOS windows
+- `components/apps/` — the PyraOS windows (loss ledger, inspector, fault timeline, what-if simulator, fault economics, fleet risk, soiling, copilot, …)
 - `app/api/copilot/` — Anthropic-backed O&M Copilot route
 - `public/artifacts/` — generated JSON (gitignored)

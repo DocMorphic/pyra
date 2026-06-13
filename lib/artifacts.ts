@@ -108,6 +108,133 @@ export interface TicketEntry {
   category: string | null;
 }
 
+// --- Phase 7: deep-analytics artifacts ---------------------------------
+
+export interface DcEpisode {
+  start: string;
+  end: string;
+  days: number;
+  kind: "disconnect" | "string";
+  baselineRatio: number;
+  duringRatio: number;
+  estStringsDown: number | null;
+  lostKwh: number;
+}
+export interface DcInverter {
+  nStrings: number | null;
+  nominalUdc: number;
+  meanEff: number;
+  effByYear: { year: number; eff: number }[];
+  rHealthy: number;
+  chronicRatio: number | null;
+  chronicStringsDown: number | null;
+  disconnectDays: number;
+  estStringsDown: number | null;
+  dcLostKwh: number;
+  episodes: DcEpisode[];
+}
+export interface DcDiag {
+  perInverter: Record<string, DcInverter>;
+  totalDcLostKwh: number;
+  invertersWithDisconnects: number;
+  totalDisconnectEpisodes: number;
+  chronicShortfallInverters: number;
+}
+
+export interface FaultCategory {
+  category: string;
+  label: string;
+  events: number;
+  invertersAffected: number;
+  lostKwh: number;
+  lostEur: number;
+}
+export interface FaultCode {
+  code: string;
+  description: string;
+  category: string;
+  count: number;
+  meanDropKw: number;
+  lostKwh: number;
+  lostEur: number;
+}
+export interface FaultEcon {
+  categories: FaultCategory[];
+  topCodes: FaultCode[];
+  totalAttributedEur: number;
+  totalLossEur: number;
+  attributedFraction: number;
+  totalOnsets: number;
+  attribWindowDays: number;
+}
+
+export interface RiskDriver { key: string; label: string; contribution: number }
+export interface RiskInverter {
+  risk: number;
+  health: number;
+  degradationRate: number | null;
+  recentErrors12mo: number;
+  errorTrend: number;
+  recentDcEvents: number;
+  tickets: number;
+  drivers: RiskDriver[];
+}
+export interface RiskData {
+  asOf: string;
+  perInverter: Record<string, RiskInverter>;
+  ranked: string[];
+  ticketLink: {
+    linkedTickets: number;
+    totalTickets: number;
+    withPrecedingErrors: number;
+    medianLeadDays: number | null;
+    topCategories: { category: string; count: number }[];
+  };
+  weights: Record<string, number>;
+}
+
+export interface SimCause { kwh: number; eur: number }
+export interface SimInverter {
+  kWp: number | null;
+  health: number | null;
+  degradationRatePctYr: number | null;
+  recentAnnualKwh: number;
+  avgTariff: number;
+  lossByCause: Record<"dc" | "outage" | "fault" | "degradation", SimCause>;
+  recoverableEur: number;
+  lostEur: number | null;
+}
+export interface Simulator {
+  asOf: string;
+  perInverter: Record<string, SimInverter>;
+  rankedByRecoverable: string[];
+  fleetByCause: Record<"dc" | "outage" | "fault" | "degradation", SimCause>;
+  fleetRecoverableEur: number;
+  fleetTotalLossEur: number;
+}
+
+export interface SoilingEpisode {
+  start: string;
+  trough: string;
+  end: string;
+  days: number;
+  depthPct: number;
+  ratePctPerDay: number;
+}
+export interface Soiling {
+  plant: string;
+  coords: { lat: number; lon: number };
+  kWp: number;
+  clearDays: number;
+  soilingRatePctPerDay: number | null;
+  totalSoilingLossPct: number;
+  annualSoilingLossKwh: number;
+  annualSoilingLossEur: number;
+  meanPR: number;
+  episodes: SoilingEpisode[];
+  series: { t: string; v: number }[];
+}
+
 export interface ArtifactBundle {
   meta: PlantMeta;
   inverters: InverterInfo[];
@@ -118,26 +245,39 @@ export interface ArtifactBundle {
   tickets: TicketEntry[];
   metrics: ModelMetrics;
   moduleTypes: Record<string, ModuleTypeAgg>;
+  dc: DcDiag;
+  faultEcon: FaultEcon;
+  risk: RiskData;
+  simulator: Simulator;
+  soiling: Soiling;
 }
 
 const BASE = "/artifacts";
 
 export async function loadArtifacts(): Promise<ArtifactBundle> {
-  const [meta, inverters, ledger, performance, causes, faults, tickets, metrics, degradation] =
-    await Promise.all([
-      fetchJson<PlantMeta>("meta.json"),
-      fetchJson<InverterInfo[]>("inverters.json"),
-      fetchJson<LedgerEntry[]>("loss_ledger.json"),
-      fetchJson<Record<string, Performance>>("performance.json"),
-      fetchJson<Record<string, Cause>>("causes.json"),
-      fetchJson<Record<string, FaultSummary>>("faults.json"),
-      fetchJson<TicketEntry[]>("tickets.json"),
-      fetchJson<ModelMetrics>("model_metrics.json"),
-      fetchJson<{ byModuleType: Record<string, ModuleTypeAgg> }>("degradation.json"),
-    ]);
+  const [
+    meta, inverters, ledger, performance, causes, faults, tickets, metrics, degradation,
+    dc, faultEcon, risk, simulator, soiling,
+  ] = await Promise.all([
+    fetchJson<PlantMeta>("meta.json"),
+    fetchJson<InverterInfo[]>("inverters.json"),
+    fetchJson<LedgerEntry[]>("loss_ledger.json"),
+    fetchJson<Record<string, Performance>>("performance.json"),
+    fetchJson<Record<string, Cause>>("causes.json"),
+    fetchJson<Record<string, FaultSummary>>("faults.json"),
+    fetchJson<TicketEntry[]>("tickets.json"),
+    fetchJson<ModelMetrics>("model_metrics.json"),
+    fetchJson<{ byModuleType: Record<string, ModuleTypeAgg> }>("degradation.json"),
+    fetchJson<DcDiag>("dc_diag.json"),
+    fetchJson<FaultEcon>("fault_econ.json"),
+    fetchJson<RiskData>("risk.json"),
+    fetchJson<Simulator>("simulator.json"),
+    fetchJson<Soiling>("soiling.json"),
+  ]);
   return {
     meta, inverters, ledger, performance, causes, faults, tickets,
     metrics, moduleTypes: degradation.byModuleType,
+    dc, faultEcon, risk, simulator, soiling,
   };
 }
 
@@ -181,3 +321,38 @@ export function healthColor(h: number): string {
   if (h >= 0.65) return "#eb6e2a";
   return "#f35454";
 }
+
+/** Risk score 0–100 → color ramp (green low → red high). */
+export function riskColor(r: number): string {
+  if (r >= 70) return "#f35454";
+  if (r >= 50) return "#eb6e2a";
+  if (r >= 30) return "#f7a501";
+  if (r >= 15) return "#9bbf3a";
+  return "#6aa84f";
+}
+
+// Fault-economics category palette (PostHog bright categorical).
+export const FAULT_CAT_COLOR: Record<string, string> = {
+  grid: "#2f80fa",
+  power_stage: "#b62ad9",
+  dc_link: "#f7a501",
+  isolation: "#29dbbb",
+  overtemp: "#f35454",
+  comms: "#9698a0",
+  other: "var(--color-text-dim)",
+  unattributed: "var(--color-text-dim)",
+};
+
+// What-if recoverable-loss buckets.
+export const SIM_CAUSE_COLOR: Record<string, string> = {
+  dc: "#29dbbb",
+  outage: "#f35454",
+  fault: "#b62ad9",
+  degradation: "#f7a501",
+};
+export const SIM_CAUSE_LABEL: Record<string, string> = {
+  dc: "DC / string",
+  outage: "Outage",
+  fault: "Inverter fault",
+  degradation: "Degradation",
+};

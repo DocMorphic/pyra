@@ -1,9 +1,9 @@
 "use client";
 
-import { AppHeader, Stat, EmptyState, Sticker } from "./_shared";
+import { AppHeader, Stat, EmptyState, Sticker, SectionCard } from "./_shared";
 import { UplotChart } from "./_uplot";
 import { usePyraData } from "@/hooks/use-pyra-data";
-import { CAUSE_LABEL, CAUSE_COLOR, eur, healthColor } from "@/lib/artifacts";
+import { CAUSE_LABEL, CAUSE_COLOR, eur, kwh, healthColor, riskColor } from "@/lib/artifacts";
 
 export function InverterInspectorApp() {
   const { data, loading, error, selectedInverter, setSelectedInverter } = usePyraData();
@@ -30,6 +30,8 @@ export function InverterInspectorApp() {
   const firstYear = perf.years[0]?.year;
   const lastYear = perf.years[perf.years.length - 1]?.year;
   const degrRate = entry.degradationRate;
+  const dc = id ? data.dc?.perInverter[id] : undefined;
+  const risk = id ? data.risk?.perInverter[id] : undefined;
 
   return (
     <div className="custom-scrollbar flex h-full flex-col overflow-y-auto">
@@ -56,7 +58,16 @@ export function InverterInspectorApp() {
         <Stat label="Health" value={`${(entry.health * 100).toFixed(0)}%`} tone={entry.health < 0.8 ? "error" : entry.health < 0.92 ? "warn" : "success"} />
         <Stat label="Lost revenue" value={`${eur(entry.lostEur)}`} tone="error" />
         <Stat label="Degradation /yr" value={degrRate != null ? `${degrRate.toFixed(2)}%` : "—"} tone="warn" />
-        <Stat label="Model R²" value={entry.modelR2 != null ? entry.modelR2.toFixed(2) : "—"} />
+        {risk ? (
+          <div className="ph-card flex-1 px-3.5 py-3" style={{ borderBottom: `3px solid ${riskColor(risk.risk)}` }}>
+            <div className="ph-label">Risk score</div>
+            <div className="font-mono mt-1.5 text-[23px] font-bold tabular-nums leading-none" style={{ color: riskColor(risk.risk) }}>
+              {risk.risk.toFixed(0)}
+            </div>
+          </div>
+        ) : (
+          <Stat label="Model R²" value={entry.modelR2 != null ? entry.modelR2.toFixed(2) : "—"} />
+        )}
       </div>
 
       <div className="mb-1 flex items-center justify-between">
@@ -124,6 +135,68 @@ export function InverterInspectorApp() {
       <div className="mt-1 text-[10.5px]" style={{ color: "var(--color-text-dim)" }}>
         Bar = IEC 61724 Performance Ratio per year, {firstYear}–{lastYear}.
       </div>
+
+      {/* DC / string diagnostics — from per-inverter I_DC_SUM / U_DC */}
+      {dc && (
+        <div className="mt-5">
+          <SectionCard title="DC / string health" color="#29dbbb"
+            right={
+              <span className="text-[11px]" style={{ color: "var(--color-text-muted)" }}>
+                {dc.nStrings ?? "—"} strings · {dc.nominalUdc} V nominal
+              </span>
+            }>
+            <div className="mb-2 flex gap-2">
+              <Stat label="DC→AC efficiency" value={`${(dc.meanEff * 100).toFixed(1)}%`} tone="success" />
+              <Stat
+                label="DC current vs peers"
+                value={dc.chronicRatio != null ? `${(dc.chronicRatio * 100).toFixed(0)}%` : "—"}
+                tone={dc.chronicStringsDown ? "error" : "default"}
+              />
+              <Stat label="DC fault loss" value={kwh(dc.dcLostKwh)} tone={dc.dcLostKwh > 0 ? "warn" : "default"} />
+            </div>
+            {dc.chronicStringsDown != null && (
+              <div className="mb-2 text-[11.5px]" style={{ color: "var(--color-salmon)" }}>
+                ⚠ Runs persistently at {(dc.chronicRatio! * 100).toFixed(0)}% of peer DC current — consistent with ≈{dc.chronicStringsDown} string(s) down the whole time.
+              </div>
+            )}
+            {dc.episodes.length > 0 ? (
+              <div className="space-y-1">
+                <div className="text-[11px] font-medium" style={{ color: "var(--color-text-muted)" }}>
+                  {dc.episodes.length} DC-disconnect event(s) — I_DC→0 with voltage healthy:
+                </div>
+                {dc.episodes.slice(0, 6).map((e) => (
+                  <div key={e.start} className="flex items-center justify-between text-[11px]" style={{ color: "var(--color-text-secondary)" }}>
+                    <span className="font-mono">{e.start} → {e.end}</span>
+                    <span>{e.days}d · {kwh(e.lostKwh)} lost</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-[11px]" style={{ color: "var(--color-text-dim)" }}>
+                No discrete DC-disconnect events detected — DC current tracks irradiance normally.
+              </div>
+            )}
+          </SectionCard>
+        </div>
+      )}
+
+      {/* Risk drivers */}
+      {risk && risk.drivers.length > 0 && (
+        <div className="mb-2 flex flex-wrap items-center gap-1.5">
+          <span className="text-[11px]" style={{ color: "var(--color-text-muted)" }}>Risk drivers:</span>
+          {risk.drivers.map((d) => (
+            <span key={d.key} className="rounded px-1.5 py-0.5 text-[10px]"
+              style={{ background: "var(--color-info-box)", color: "var(--color-text-muted)", border: "1px solid var(--color-border)" }}>
+              {d.label}
+            </span>
+          ))}
+          {risk.tickets > 0 && (
+            <span className="rounded px-1.5 py-0.5 text-[10px]" style={{ background: "var(--color-info-box)", color: "var(--color-text-muted)", border: "1px solid var(--color-border)" }}>
+              {risk.tickets} O&amp;M ticket{risk.tickets > 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -26,12 +26,20 @@ import { ExecutiveReportApp } from "@/components/apps/ExecutiveReportApp";
 import { MethodsApp } from "@/components/apps/MethodsApp";
 import { SettingsApp } from "@/components/apps/SettingsApp";
 import { AboutApp } from "@/components/apps/AboutApp";
+import { SimulatorApp } from "@/components/apps/SimulatorApp";
+import { FaultEconApp } from "@/components/apps/FaultEconApp";
+import { RiskApp } from "@/components/apps/RiskApp";
+import { SoilingApp } from "@/components/apps/SoilingApp";
 
 const APP_COMPONENTS: Record<string, React.ComponentType> = {
   "plant-map": PlantMapApp,
   "loss-ledger": LossLedgerApp,
   inspector: InverterInspectorApp,
   timeline: FaultTimelineApp,
+  simulator: SimulatorApp,
+  "fault-econ": FaultEconApp,
+  risk: RiskApp,
+  soiling: SoilingApp,
   copilot: CopilotApp,
   methods: MethodsApp,
   report: ExecutiveReportApp,
@@ -47,7 +55,16 @@ export function Desktop() {
   // Open the money headline + plant overview on boot so the demo lands
   // straight on the value.
   useEffect(() => {
-    windowManager.openWindow("about");
+    // Deep-link: ?open=simulator,risk opens those windows (shareable views).
+    const params = new URLSearchParams(window.location.search);
+    const open = params.get("open");
+    if (open) {
+      open.split(",").map((s) => s.trim()).filter(Boolean).forEach((id) => {
+        if (APP_REGISTRY[id]) windowManager.openWindow(id);
+      });
+    } else {
+      windowManager.openWindow("about");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
