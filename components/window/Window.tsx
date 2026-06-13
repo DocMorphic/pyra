@@ -248,7 +248,7 @@ export function Window({
         onPointerMove={handleDragMove}
         onPointerUp={handleDragUp}
       />
-      <WindowToolbar action={appId === "report" ? "Share" : appId === "copilot" ? "New chat" : "Export"} />
+      <WindowToolbar appId={appId} />
       <WindowContent noPadding={appDef.noContentPadding}>{children}</WindowContent>
 
       {!noResize && (
