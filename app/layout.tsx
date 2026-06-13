@@ -50,7 +50,7 @@ export const metadata: Metadata = {
 // localStorage before React hydrates to prevent flash-of-unstyled-content.
 // useLocalStorage stores values JSON-stringified, so quotes are stripped.
 // No user input crosses this boundary; the literal string is safe to inline.
-const FOUC_INIT_SCRIPT = `(function(){try{var s=function(k,d){var v=localStorage.getItem(k);if(v==null)return d;return v.replace(/^"|"$/g,'');};var t=s('pyra:theme','light');var a=s('pyra:accent','orange');var b=s('pyra:brightness','100');var d=document.documentElement;d.setAttribute('data-theme',t);d.setAttribute('data-accent',a);d.style.setProperty('--display-brightness',(parseInt(b,10)/100).toString())}catch(e){}})()`;
+const FOUC_INIT_SCRIPT = `(function(){try{var s=function(k,d){var v=localStorage.getItem(k);if(v==null)return d;return v.replace(/^"|"$/g,'');};var t=s('pyra:theme','dark');var a=s('pyra:accent','red');var b=s('pyra:brightness','100');var d=document.documentElement;d.setAttribute('data-theme',t);d.setAttribute('data-accent',a);d.style.setProperty('--display-brightness',(parseInt(b,10)/100).toString())}catch(e){}})()`;
 
 export default function RootLayout({
   children,
@@ -60,8 +60,8 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      data-theme="light"
-      data-accent="orange"
+      data-theme="dark"
+      data-accent="red"
       suppressHydrationWarning
       className={`${plexSans.variable} ${plexMono.variable} h-full antialiased`}
     >

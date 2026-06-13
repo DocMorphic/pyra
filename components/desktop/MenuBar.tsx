@@ -216,14 +216,23 @@ export function MenuBar() {
         </MenuButton>
       </div>
 
-      <div className="flex items-stretch gap-3">
+      <div className="flex items-center gap-2.5 pr-1">
+        <button
+          className="ph-btn red hidden text-[12px] sm:inline-flex"
+          style={{ padding: "5px 14px" }}
+          onClick={() => openWindow("report")}
+        >
+          Live demo
+        </button>
+        <button className="ph-tool" aria-label="Search" title="Search">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" /></svg>
+        </button>
         <span
-          className="hidden items-center text-[11.5px] tabular-nums sm:flex"
+          className="hidden items-center text-[11.5px] tabular-nums md:flex"
           style={{ color: "var(--color-menubar-text)" }}
         >
           {clock}
         </span>
-
         <div className="relative flex items-center">
           <DisplayButton
             isOpen={openMenu === "brightness"}

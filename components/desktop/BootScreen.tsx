@@ -29,7 +29,7 @@ export function BootScreen() {
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center"
       style={{
-        background: "#eeefe9",
+        background: "#1d1f23",
         opacity: fadeOut ? 0 : 1,
         transition: "opacity 0.35s ease-in",
         pointerEvents: fadeOut ? "none" : "auto",
@@ -45,10 +45,10 @@ export function BootScreen() {
           className="flex flex-col items-center gap-1"
           style={{ opacity: 0, animation: "wordmark-in 0.5s ease-out 0.5s forwards" }}
         >
-          <div className="font-display text-[34px]" style={{ color: "#151515", fontWeight: 700, letterSpacing: "-0.02em" }}>
+          <div className="font-display text-[34px]" style={{ color: "#eeefe9", fontWeight: 700, letterSpacing: "-0.02em" }}>
             Pyra
           </div>
-          <div className="font-mono text-[11px] uppercase tracking-[0.18em]" style={{ color: "#73756b" }}>
+          <div className="font-mono text-[11px] uppercase tracking-[0.18em]" style={{ color: "#9698a0" }}>
             Counting photons…
           </div>
         </div>

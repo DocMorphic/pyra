@@ -9,8 +9,8 @@ export const STORAGE_KEYS = {
 } as const;
 
 export const DEFAULT_THEME = {
-  // PostHog-style cream light mode by default; dark available via toggle.
-  mode: "light" as const,
+  // PostHog's real default is the dark OS desktop; light is "website mode".
+  mode: "dark" as const,
   brightness: 100,
 };
 

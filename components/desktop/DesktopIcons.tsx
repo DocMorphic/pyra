@@ -27,23 +27,33 @@ interface IconPos {
 interface DesktopItem {
   id: string;
   label: string;
-  type: "map" | "ledger" | "scope" | "report";
+  accent: string;
   appId: string;
+  side: "left" | "right";
 }
 
 const DESKTOP_ITEMS: DesktopItem[] = [
-  { id: "plant-map", label: "Plant Map", type: "map", appId: "plant-map" },
-  { id: "loss-ledger", label: "Loss Ledger", type: "ledger", appId: "loss-ledger" },
-  { id: "inspector", label: "Inspector", type: "scope", appId: "inspector" },
-  { id: "report", label: "Report", type: "report", appId: "report" },
+  { id: "plant-map", label: "plant-map.svg", accent: "#f54e00", appId: "plant-map", side: "left" },
+  { id: "loss-ledger", label: "loss-ledger.csv", accent: "#f7a501", appId: "loss-ledger", side: "left" },
+  { id: "inspector", label: "inspector.app", accent: "#2f80fa", appId: "inspector", side: "left" },
+  { id: "timeline", label: "faults.log", accent: "#f35454", appId: "timeline", side: "left" },
+  { id: "methods", label: "methods.md", accent: "#29dbbb", appId: "methods", side: "right" },
+  { id: "copilot", label: "ask-sunny", accent: "#b62ad9", appId: "copilot", side: "right" },
+  { id: "report", label: "report.pdf", accent: "#6aa84f", appId: "report", side: "right" },
+  { id: "about", label: "about.txt", accent: "#9698a0", appId: "about", side: "right" },
 ];
 
-const DEFAULT_POSITIONS: Record<string, IconPos> = {
-  "plant-map": { x: 24, y: 24 },
-  "loss-ledger": { x: 24, y: 124 },
-  inspector: { x: 24, y: 224 },
-  report: { x: 24, y: 324 },
-};
+function computePositions(): Record<string, IconPos> {
+  const vw = typeof window !== "undefined" ? window.innerWidth : 1440;
+  const rightX = Math.max(140, vw - 116);
+  const pos: Record<string, IconPos> = {};
+  let li = 0, ri = 0;
+  for (const it of DESKTOP_ITEMS) {
+    if (it.side === "left") pos[it.id] = { x: 28, y: 28 + li++ * 100 };
+    else pos[it.id] = { x: rightX, y: 28 + ri++ * 100 };
+  }
+  return pos;
+}
 
 function clampPosition(x: number, y: number): IconPos {
   if (typeof window === "undefined") return { x, y };
@@ -63,7 +73,11 @@ function clampPosition(x: number, y: number): IconPos {
 export function DesktopIcons() {
   const { openWindow } = useWindowManager();
   const isMobile = useIsMobile();
-  const [positions, setPositions] = useState<Record<string, IconPos>>(DEFAULT_POSITIONS);
+  const [positions, setPositions] = useState<Record<string, IconPos>>(() => computePositions());
+
+  useEffect(() => {
+    setPositions(computePositions());
+  }, []);
 
   const handleActivate = useCallback(
     (item: DesktopItem) => openWindow(item.appId),
@@ -83,10 +97,10 @@ export function DesktopIcons() {
               className="flex w-[88px] shrink-0 flex-col items-center gap-1.5 rounded-lg px-1 py-1 select-none"
               onClick={() => handleActivate(item)}
             >
-              <DesktopIconSvg type={item.type} size={48} />
+              <DesktopIconSvg accent={item.accent} size={48} />
               <span
-                className="w-full truncate text-center text-[11.5px]"
-                style={{ color: "var(--color-desktop-label)", fontWeight: 500 }}
+                className="font-mono w-full truncate text-center text-[11px]"
+                style={{ color: "var(--color-desktop-label)", fontWeight: 500, textDecoration: "underline", textUnderlineOffset: 3 }}
               >
                 {item.label}
               </span>
@@ -103,7 +117,7 @@ export function DesktopIcons() {
         <DraggableIcon
           key={item.id}
           item={item}
-          position={positions[item.id] ?? DEFAULT_POSITIONS[item.id]}
+          position={positions[item.id] ?? { x: 28, y: 28 }}
           onOpen={() => handleActivate(item)}
           onCommit={(x, y) => {
             setPositions((prev) => ({
@@ -216,10 +230,10 @@ function DraggableIcon({ item, position, onOpen, onCommit }: DraggableIconProps)
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
     >
-      <DesktopIconSvg type={item.type} />
+      <DesktopIconSvg accent={item.accent} />
       <span
-        className="pointer-events-none text-center text-[11.5px] leading-tight"
-        style={{ color: "var(--color-desktop-label)", fontWeight: 500 }}
+        className="font-mono pointer-events-none text-center text-[11px] leading-tight"
+        style={{ color: "var(--color-desktop-label)", fontWeight: 500, textDecoration: "underline", textUnderlineOffset: 3 }}
       >
         {item.label}
       </span>
@@ -227,62 +241,27 @@ function DraggableIcon({ item, position, onOpen, onCommit }: DraggableIconProps)
   );
 }
 
-function DesktopIconSvg({
-  type,
-  size = 52,
-}: {
-  type: "map" | "ledger" | "scope" | "report";
-  size?: number;
-}) {
-  if (type === "map") {
-    return (
-      <svg width={size} height={size} viewBox="0 0 52 52" fill="none">
-        <rect x="6" y="6" width="40" height="40" rx="8" fill="var(--color-accent)" />
-        <g stroke="white" strokeWidth="2" strokeLinecap="round">
-          <rect x="14" y="14" width="9" height="9" rx="1.5" fill="rgba(255,255,255,0.25)" />
-          <rect x="29" y="14" width="9" height="9" rx="1.5" fill="rgba(255,255,255,0.6)" />
-          <rect x="14" y="29" width="9" height="9" rx="1.5" fill="rgba(255,255,255,0.45)" />
-          <rect x="29" y="29" width="9" height="9" rx="1.5" fill="rgba(255,255,255,0.15)" />
-        </g>
-      </svg>
-    );
-  }
-  if (type === "ledger") {
-    return (
-      <svg width={size} height={size} viewBox="0 0 52 52" fill="none">
-        <rect x="6" y="6" width="40" height="40" rx="8" fill="var(--color-accent)" />
-        <path
-          d="M18 16h12a6 6 0 010 12H18M15 22h16M15 28h10M18 16v20"
-          stroke="white"
-          strokeWidth="2.2"
-          strokeLinecap="round"
-          fill="none"
-        />
-      </svg>
-    );
-  }
-  if (type === "scope") {
-    return (
-      <svg width={size} height={size} viewBox="0 0 52 52" fill="none">
-        <rect x="6" y="6" width="40" height="40" rx="8" fill="var(--color-accent)" />
-        <circle cx="23" cy="23" r="9" stroke="white" strokeWidth="2.2" fill="none" />
-        <line x1="30" y1="30" x2="38" y2="38" stroke="white" strokeWidth="2.6" strokeLinecap="round" />
-        <path d="M18 24l3-4 2.5 3 2.5-5" stroke="white" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  }
+/** PostHog-style desktop file icon: a document with a colored corner-fold
+ *  tab and a small accent glyph. */
+function DesktopIconSvg({ accent, size = 52 }: { accent: string; size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 52 52" fill="none">
+      {/* document body */}
       <path
-        d="M14 6 L 32 6 L 40 14 L 40 44 Q 40 46 38 46 L 14 46 Q 12 46 12 44 L 12 8 Q 12 6 14 6 Z"
-        fill="var(--color-surface)"
-        stroke="var(--color-border-strong)"
-        strokeWidth="1"
+        d="M12 5 L33 5 L43 15 L43 45 Q43 47 41 47 L12 47 Q10 47 10 45 L10 7 Q10 5 12 5 Z"
+        fill="#2a2c32"
+        stroke="#43454d"
+        strokeWidth="1.5"
       />
-      <path d="M32 6 L 32 14 L 40 14" stroke="var(--color-border-strong)" strokeWidth="1" fill="none" />
-      <path d="M18 22l3-4 2.5 3 2.5-5 3 6" stroke="var(--color-accent)" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      <line x1="18" y1="34" x2="34" y2="34" stroke="var(--color-text-muted)" strokeWidth="1" />
-      <line x1="18" y1="38" x2="28" y2="38" stroke="var(--color-text-muted)" strokeWidth="1" />
+      {/* folded corner */}
+      <path d="M33 5 L33 15 L43 15 Z" fill="#43454d" />
+      {/* colored header band */}
+      <path d="M12 5 L33 5 L33 13 L10 13 L10 7 Q10 5 12 5 Z" fill={accent} opacity="0.9" />
+      {/* accent glyph + lines */}
+      <circle cx="18" cy="24" r="3" fill={accent} />
+      <line x1="25" y1="24" x2="38" y2="24" stroke="#9698a0" strokeWidth="1.6" strokeLinecap="round" />
+      <line x1="16" y1="32" x2="38" y2="32" stroke="#5b5e67" strokeWidth="1.6" strokeLinecap="round" />
+      <line x1="16" y1="38" x2="32" y2="38" stroke="#5b5e67" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
 }

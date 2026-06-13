@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useWindowManager } from "@/hooks/use-window-manager";
 import { APP_REGISTRY } from "@/lib/constants";
 import { WindowTitleBar } from "./WindowTitleBar";
+import { WindowToolbar } from "./WindowToolbar";
 import { WindowContent } from "./WindowContent";
 
 const MOBILE_BREAKPOINT = 768;
@@ -247,6 +248,7 @@ export function Window({
         onPointerMove={handleDragMove}
         onPointerUp={handleDragUp}
       />
+      <WindowToolbar action={appId === "report" ? "Share" : appId === "copilot" ? "New chat" : "Export"} />
       <WindowContent noPadding={appDef.noContentPadding}>{children}</WindowContent>
 
       {!noResize && (

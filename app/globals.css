@@ -136,7 +136,7 @@
   --color-error: #ff7e54;
   --color-link: #4e93ff;
 
-  --color-menubar-bg: rgba(30, 31, 35, 0.9);
+  --color-menubar-bg: #1a1b1f;
   --color-menubar-border: #35373d;
   --color-menubar-text: #eeefe9;
   --color-menubar-hover: #2a2c32;
@@ -213,17 +213,19 @@ body {
    darker border, a colored bottom layer (0 3px 0), lifts on hover and
    presses on click. Primary = red; .gold = PostHog's amber default. */
 .ph-btn {
-  --btn-face: #f54e00;
-  --btn-edge: #b23800;
+  /* PostHog primary = yellow key with bold near-black text */
+  --btn-face: #f1a82c;
+  --btn-edge: #b17816;
+  --btn-text: #151515;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   padding: 7px 16px;
   border: 1.5px solid var(--btn-edge);
-  border-radius: var(--radius-pill);
+  border-radius: 6px;
   background: var(--btn-face);
-  color: #fff;
+  color: var(--btn-text);
   font-weight: 700;
   line-height: 1.1;
   box-shadow: 0 3px 0 var(--btn-edge);
@@ -233,11 +235,12 @@ body {
 .ph-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 0 var(--btn-edge); filter: brightness(1.04); }
 .ph-btn:active { transform: translateY(1px); box-shadow: 0 1px 0 var(--btn-edge); filter: none; }
 .ph-btn:disabled { opacity: 0.5; transform: translateY(-1px); box-shadow: 0 3px 0 var(--btn-edge); filter: none; cursor: default; }
-.ph-btn.gold { --btn-face: #eb9d2a; --btn-edge: #b17816; color: #151515; }
+.ph-btn.red { --btn-face: #f54e00; --btn-edge: #b23800; --btn-text: #fff; }
+.ph-btn.gold { --btn-face: #eb9d2a; --btn-edge: #b17816; --btn-text: #151515; }
 .ph-btn.secondary {
-  --btn-face: var(--color-surface);
+  --btn-face: var(--color-surface-alt);
   --btn-edge: var(--color-border-hover);
-  color: var(--color-text);
+  --btn-text: var(--color-text);
 }
 
 /* Boxed section card (PostHog "reporting card") */
@@ -319,40 +322,72 @@ body {
   100% { opacity: 1; transform: scale(1); }
 }
 
-/* === Window control buttons — macOS traffic-light pattern === */
+/* === Window control buttons — Windows-style (min / max / close, right) === */
 .window-control-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
-  color: transparent;
-  transition: filter 0.1s ease, transform 0.1s ease;
-  cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.18);
-  border-radius: 50%;
+  width: 30px;
+  height: 26px;
+  border: none;
+  border-radius: 5px;
   padding: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  transition: background 0.1s ease, color 0.1s ease;
+}
+.window-control-btn:hover { background: var(--color-surface-hover); color: var(--color-text); }
+.window-control-btn.close:hover { background: #f54e00; color: #fff; }
+
+/* === PostHog app-tile (dark card, colored icon, centered label) === */
+.ph-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 10px;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  transition: border-color 0.12s ease, background 0.12s ease, transform 0.08s ease;
+}
+.ph-tile:hover { border-color: var(--color-border-hover); background: var(--color-surface-hover); transform: translateY(-1px); }
+
+/* === Tab strip — teal-outlined active tab === */
+.ph-tab {
+  padding: 6px 14px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  border: 1.5px solid transparent;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  background: transparent;
+}
+.ph-tab.active {
+  color: var(--color-text);
+  border-color: #29dbbb;
+  background: color-mix(in srgb, #29dbbb 10%, transparent);
 }
 
-.window-titlebar-controls:hover .window-control-btn {
-  transform: scale(1.05);
+/* === Toolbar ribbon control === */
+.ph-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 26px;
+  min-width: 26px;
+  padding: 0 6px;
+  border-radius: 5px;
+  color: var(--color-text-muted);
+  background: transparent;
+  transition: background 0.1s ease, color 0.1s ease;
 }
-
-.window-control-btn.close    { background: #ff5f57; }
-.window-control-btn.minimize { background: #febc2e; }
-.window-control-btn.maximize { background: #28c840; }
-
-.window-titlebar-controls:hover .window-control-btn {
-  color: rgba(0, 0, 0, 0.55);
-}
-
-.window-control-btn:active {
-  filter: brightness(0.9);
-}
-
-[data-theme="dark"] .window-control-btn {
-  border-color: rgba(255, 255, 255, 0.22);
-}
+.ph-tool:hover { background: var(--color-surface-hover); color: var(--color-text); }
+.ph-tool.pill { border: 1px solid var(--color-border); padding: 0 8px; font-size: 12px; }
 
 /* Hide scrollbar where needed */
 .no-scrollbar {

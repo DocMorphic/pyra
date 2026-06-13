@@ -17,13 +17,12 @@ interface WindowTitleBarProps {
   onPointerUp: (e: React.PointerEvent) => void;
 }
 
+/** PostHog/Windows-style title bar: file-doc icon + caret (left),
+ *  centered bold title, minimize/maximize/close on the right. */
 export function WindowTitleBar({
   title,
   isFocused,
   isMaximized = false,
-  draggable = true,
-  itemCount,
-  statusText,
   showMinimize = true,
   showMaximize = true,
   onClose,
@@ -35,69 +34,25 @@ export function WindowTitleBar({
 }: WindowTitleBarProps) {
   return (
     <div
-      // Title bar drives drag via pointer events — visual cursor stays
-      // default at the user's request (per polish v4 feedback).
-      className="relative flex h-9 shrink-0 items-center justify-between border-b pl-3 pr-2"
+      className="relative flex h-10 shrink-0 items-center justify-between border-b pl-3 pr-1.5"
       style={{
         background: "var(--color-titlebar)",
         borderColor: "var(--color-titlebar-border)",
-        cursor: draggable ? "default" : "default",
       }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
     >
-      {/* Controls — LEFT (macOS-style traffic lights). The container
-         class drives the :hover reveal of all three glyphs at once. */}
-      <div
-        className="window-titlebar-controls flex h-full items-center gap-2"
-        onPointerDown={(e) => e.stopPropagation()}
-        onMouseDown={(e) => e.stopPropagation()}
-      >
-        <button
-          className="window-control-btn close"
-          onClick={onClose}
-          aria-label="Close"
-        >
-          <svg width="6" height="6" viewBox="0 0 6 6">
-            <line x1="1.4" y1="1.4" x2="4.6" y2="4.6" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
-            <line x1="4.6" y1="1.4" x2="1.4" y2="4.6" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
-          </svg>
-        </button>
-
-        {showMinimize && (
-          <button
-            className="window-control-btn minimize"
-            onClick={onMinimize}
-            aria-label="Minimize"
-          >
-            <svg width="6" height="6" viewBox="0 0 6 6">
-              <line x1="1" y1="3" x2="5" y2="3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
-            </svg>
-          </button>
-        )}
-
-        {showMaximize && (
-          <button
-            className="window-control-btn maximize"
-            onClick={onMaximize}
-            aria-label={isMaximized ? "Restore" : "Maximize"}
-          >
-            <svg width="6" height="6" viewBox="0 0 6 6">
-              {isMaximized ? (
-                <>
-                  <line x1="1" y1="3" x2="5" y2="3" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
-                  <line x1="3" y1="1" x2="3" y2="5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
-                </>
-              ) : (
-                <>
-                  <polygon points="1,4.5 4.5,4.5 4.5,1" fill="currentColor" />
-                  <polygon points="1,1.5 1.5,1 4.5,1 4.5,1.5 1.5,4.5 1,4.5" fill="currentColor" opacity="0.001" />
-                </>
-              )}
-            </svg>
-          </button>
-        )}
+      {/* Left — file-doc icon + caret (decorative document affordance) */}
+      <div className="flex items-center gap-1" style={{ color: "var(--color-text-muted)" }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M7 3h7l4 4v14H7z" />
+          <path d="M14 3v4h4" />
+          <path d="M10 12h5M10 16h5" />
+        </svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
       </div>
 
       {/* Title — CENTER */}
@@ -106,25 +61,33 @@ export function WindowTitleBar({
         style={{
           color: isFocused ? "var(--color-text)" : "var(--color-text-muted)",
           fontWeight: 700,
-          maxWidth: "60%",
+          maxWidth: "55%",
         }}
       >
-        {title}
+        {title} <span style={{ color: "var(--color-text-dim)", fontWeight: 500 }}>— Pyra</span>
       </span>
 
-      {/* Status / count — RIGHT */}
-      <div className="flex h-full items-center text-[11px]" style={{ color: "var(--color-text-muted)" }}>
-        {statusText ? (
-          <span className="flex items-center gap-1.5">
-            <span
-              className="inline-block h-1.5 w-1.5 rounded-full"
-              style={{ background: "var(--color-accent)" }}
-            />
-            {statusText}
-          </span>
-        ) : typeof itemCount === "number" ? (
-          <span>{itemCount} items</span>
-        ) : null}
+      {/* Controls — RIGHT (Windows style) */}
+      <div
+        className="window-titlebar-controls flex h-full items-center gap-0.5"
+        onPointerDown={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        {showMinimize && (
+          <button className="window-control-btn" onClick={onMinimize} aria-label="Minimize">
+            <svg width="12" height="12" viewBox="0 0 12 12"><line x1="2.5" y1="6" x2="9.5" y2="6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
+          </button>
+        )}
+        {showMaximize && (
+          <button className="window-control-btn" onClick={onMaximize} aria-label={isMaximized ? "Restore" : "Maximize"}>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.3">
+              <rect x="2.5" y="2.5" width="7" height="7" rx="1" />
+            </svg>
+          </button>
+        )}
+        <button className="window-control-btn close" onClick={onClose} aria-label="Close">
+          <svg width="12" height="12" viewBox="0 0 12 12"><line x1="3" y1="3" x2="9" y2="9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /><line x1="9" y1="3" x2="3" y2="9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
+        </button>
       </div>
     </div>
   );
