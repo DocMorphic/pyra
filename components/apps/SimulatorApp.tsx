@@ -40,8 +40,10 @@ export function SimulatorApp() {
   const recoveredEur = chosen.reduce((s, r) => s + r.selEur, 0);
   const recoveredKwh = chosen.reduce((s, r) => s + r.selKwh, 0);
 
-  // Degradation forecast: cumulative € lost to ongoing degradation over the
-  // horizon, "do nothing" vs "arrest it on the chosen inverters".
+  // Degradation forecast: CUMULATIVE € lost to ongoing degradation over the
+  // horizon — "do nothing" (whole fleet keeps degrading) vs "act now" (the
+  // chosen top-N inverters are repowered, so their decline is arrested from
+  // today). The gap = degradation revenue you'd save by servicing them.
   const forecast = useMemo(() => {
     if (!sim) return null;
     const chosenIds = new Set(chosen.map((r) => r.id));
@@ -49,23 +51,22 @@ export function SimulatorApp() {
     let cumNothing = 0, cumAct = 0;
     const doNothing: number[] = [], act: number[] = [];
     for (const t of years) {
-      let lossNothing = 0, lossAct = 0;
+      let annualNothing = 0, annualAct = 0;
       for (const [id, v] of entries) {
-        const g = (v.degradationRatePctYr ?? 0) / 100; // negative
-        if (g >= 0) continue;
+        const g = (v.degradationRatePctYr ?? 0) / 100; // negative = degrading
+        if (g >= 0 || t === 0) continue;
         const e0 = v.recentAnnualKwh || 0;
-        const yearLoss = e0 * (1 - Math.pow(1 + g, t)) * v.avgTariff;
-        lossNothing += yearLoss;
-        // acting (degradation toggle) arrests decline on chosen inverters
-        lossAct += active.degradation && chosenIds.has(id) ? 0 : yearLoss;
+        const yearLoss = e0 * (1 - Math.pow(1 + g, t)) * v.avgTariff; // shortfall vs today, year t
+        annualNothing += yearLoss;
+        annualAct += chosenIds.has(id) ? 0 : yearLoss; // chosen inverters arrested
       }
-      cumNothing = lossNothing;
-      cumAct = lossAct;
+      cumNothing += annualNothing;
+      cumAct += annualAct;
       doNothing.push(Math.round(cumNothing));
       act.push(Math.round(cumAct));
     }
-    return { years, doNothing, act, saved: cumNothing - cumAct };
-  }, [sim, entries, chosen, horizon, active.degradation]);
+    return { years, doNothing, act, saved: Math.round(cumNothing - cumAct) };
+  }, [sim, entries, chosen, horizon]);
 
   if (loading) return <EmptyState showCmd={false} title="Spinning up the twin…" />;
   const cap = capabilityOf("simulator");
@@ -169,8 +170,11 @@ export function SimulatorApp() {
               ]}
             />
             <div className="mt-2 flex flex-wrap items-center gap-4 text-[11px]" style={{ color: "var(--color-text-muted)" }}>
-              <span className="flex items-center gap-1.5"><span style={{ width: 16, height: 0, borderTop: "2px solid #f35454", display: "inline-block" }} /> Cumulative € lost to degradation — do nothing</span>
-              <span className="flex items-center gap-1.5"><span style={{ width: 16, height: 0, borderTop: "2px solid #6aa84f", display: "inline-block" }} /> Arrest decline on the {topN} chosen{!active.degradation && " (enable Degradation)"}</span>
+              <span className="flex items-center gap-1.5"><span style={{ width: 16, height: 0, borderTop: "2px solid #f35454", display: "inline-block" }} /> Do nothing — whole fleet keeps degrading (cumulative € lost)</span>
+              <span className="flex items-center gap-1.5"><span style={{ width: 16, height: 0, borderTop: "2px solid #6aa84f", display: "inline-block" }} /> Act now — degradation arrested on the {topN} chosen inverters</span>
+            </div>
+            <div className="mt-1 text-[10.5px]" style={{ color: "var(--color-text-dim)" }}>
+              x-axis = years from today; the gap is the degradation revenue saved by servicing those inverters.
             </div>
           </>
         )}

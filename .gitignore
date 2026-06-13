@@ -26,6 +26,9 @@ __pycache__/
 .venv/
 venv/
 
+# Local-only docs (not committed)
+/VIDEO_SCRIPT.md
+
 # OS / editor
 .DS_Store
 .vscode/

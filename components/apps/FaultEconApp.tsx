@@ -61,28 +61,28 @@ export function FaultEconApp() {
           <table className="w-full border-collapse text-[11.5px]">
             <thead>
               <tr style={{ color: "var(--color-text-muted)" }} className="text-left">
-                <th className="py-1.5 font-medium">Code</th>
+                <th className="whitespace-nowrap py-1.5 pr-2 font-medium">Code</th>
                 <th className="py-1.5 font-medium">Description</th>
-                <th className="py-1.5 text-right font-medium">Count</th>
-                <th className="py-1.5 text-right font-medium">Δ kW</th>
-                <th className="py-1.5 text-right font-medium">Lost €</th>
+                <th className="whitespace-nowrap py-1.5 pl-2 text-right font-medium">Count</th>
+                <th className="whitespace-nowrap py-1.5 pl-2 text-right font-medium">Δ kW</th>
+                <th className="whitespace-nowrap py-1.5 pl-2 text-right font-medium">Lost €</th>
               </tr>
             </thead>
             <tbody>
               {fe.topCodes.slice(0, 14).map((c) => (
                 <tr key={c.code} style={{ borderTop: "1px solid var(--color-border)" }}>
-                  <td className="font-mono py-1.5" style={{ color: "var(--color-text-secondary)" }}>{c.code}</td>
-                  <td className="py-1.5">
+                  <td className="font-mono whitespace-nowrap py-1.5 pr-2 align-top" style={{ color: "var(--color-text-secondary)" }}>{c.code}</td>
+                  <td className="py-1.5 align-top" style={{ color: "var(--color-text)" }}>
                     <span
-                      className="mr-1.5 inline-block h-2 w-2 rounded-full align-middle"
+                      className="mr-1.5 mt-1 inline-block h-2 w-2 shrink-0 rounded-full align-middle"
                       style={{ background: FAULT_CAT_COLOR[c.category] ?? "var(--color-text-dim)" }}
                       title={c.category}
                     />
-                    <span style={{ color: "var(--color-text)" }}>{truncate(c.description, 52)}</span>
+                    {c.description}
                   </td>
-                  <td className="py-1.5 text-right tabular-nums" style={{ color: "var(--color-text-muted)" }}>{c.count.toLocaleString("en-US")}</td>
-                  <td className="py-1.5 text-right tabular-nums" style={{ color: "var(--color-text-muted)" }}>{c.meanDropKw.toFixed(1)}</td>
-                  <td className="py-1.5 text-right tabular-nums font-medium" style={{ color: "var(--color-text)" }}>{eur(c.lostEur)}</td>
+                  <td className="whitespace-nowrap py-1.5 pl-2 text-right align-top tabular-nums" style={{ color: "var(--color-text-muted)" }}>{c.count.toLocaleString("en-US")}</td>
+                  <td className="whitespace-nowrap py-1.5 pl-2 text-right align-top tabular-nums" style={{ color: "var(--color-text-muted)" }}>{c.meanDropKw.toFixed(1)}</td>
+                  <td className="whitespace-nowrap py-1.5 pl-2 text-right align-top tabular-nums font-medium" style={{ color: "var(--color-text)" }}>{eur(c.lostEur)}</td>
                 </tr>
               ))}
             </tbody>
@@ -95,8 +95,4 @@ export function FaultEconApp() {
       </div>
     </div>
   );
-}
-
-function truncate(s: string, n: number): string {
-  return s.length > n ? s.slice(0, n - 1) + "…" : s;
 }
